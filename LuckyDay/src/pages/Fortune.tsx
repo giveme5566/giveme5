@@ -64,8 +64,15 @@ export default function Fortune() {
             
             <div className="relative bg-white rounded-3xl p-6 shadow-sm border border-gray-50">
               <div className="grid grid-cols-7 gap-1 mb-4">
-                {WEEKDAYS.map((w) => (
-                  <div key={w} className="text-center text-xs text-gray-400 py-1">
+                {WEEKDAYS.map((w, index) => (
+                  <div 
+                    key={w} 
+                    className={`text-center py-1 text-xs rounded-lg ${
+                      index === currentDate.getDay() 
+                        ? 'bg-gray-100 font-medium text-gray-800' 
+                        : 'text-gray-400'
+                    }`}
+                  >
                     {w}
                   </div>
                 ))}
