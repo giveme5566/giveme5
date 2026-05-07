@@ -65,10 +65,13 @@ function getSha方位(ganZhiDay: string): string {
 }
 
 function getPengZu(ganZhiDay: string): string {
-  const 忌 = ['嫁娶', '纳采', '订盟', '祭祀', '祈福', '开市', '交易', '立券', '出行', '移徙']
   const tianganIdx = TIANGAN.indexOf(ganZhiDay[0])
   const dizhiIdx = DIZHI.indexOf(ganZhiDay[1])
-  return `${TIANGAN[tianganIdx]}不${忌[tianganIdx % 10].charAt(0)}，${DIZHI[dizhiIdx]}不${忌[dizhiIdx % 10].charAt(0 === 0 ? 1 : 0]}`
+  const tianganChar = TIANGAN[tianganIdx]
+  const dizhiChar = DIZHI[dizhiIdx]
+  const char1 = tianganIdx === 0 ? '嫁' : tianganIdx === 1 ? '纳' : tianganIdx === 2 ? '嫁' : tianganIdx === 3 ? '祈' : tianganIdx === 4 ? '开' : tianganIdx === 5 ? '开' : tianganIdx === 6 ? '出' : tianganIdx === 7 ? '开' : tianganIdx === 8 ? '开' : '移'
+  const char2 = dizhiIdx === 0 ? '嫁' : dizhiIdx === 1 ? '动' : dizhiIdx === 2 ? '动' : dizhiIdx === 3 ? '开' : dizhiIdx === 4 ? '动' : dizhiIdx === 5 ? '动' : dizhiIdx === 6 ? '开' : dizhiIdx === 7 ? '动' : dizhiIdx === 8 ? '开' : dizhiIdx === 9 ? '开' : dizhiIdx === 10 ? '动' : '开'
+  return `${tianganChar}不${char1}，${dizhiChar}不${char2}`
 }
 
 export function getLunarInfo(date: Date = new Date()): LunarInfo {
