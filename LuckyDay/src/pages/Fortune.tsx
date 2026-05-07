@@ -11,8 +11,9 @@ export default function Fortune() {
   const [currentDate] = useState(new Date())
 
   useEffect(() => {
-    const info = getLunarInfo()
-    setLunarInfo(info)
+    getLunarInfo().then(info => {
+      setLunarInfo(info)
+    })
   }, [])
 
   if (!lunarInfo) {

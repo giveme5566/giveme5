@@ -1,5 +1,3 @@
-import lunisolar from 'lunisolar'
-
 export interface LunarInfo {
   solarDate: string
   lunarDate: string
@@ -11,9 +9,9 @@ export interface LunarInfo {
   ji: string[]
   chongSha: string
   sha方位: string
- 彭祖百忌: string
+  彭祖百忌: string
   节气: string | null
- 节日: string[]
+  节日: string[]
 }
 
 const TIANGAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸']
@@ -22,8 +20,7 @@ const ZODIAC = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '
 
 const YI_LIST = [
   '祭祀', '祈福', '嫁娶', '出行', '移徙', '入宅', '安床', '开光', '针灸', '会亲友',
-  '纳采', '订盟', '竖柱', '上梁', '造屋', '起基', '定磬', '纳财', '破土', '修坟',
-  '安葬', '立碑', '启攒', '求医', '治病', '动土', '兴业', '开市', '交易', '立券'
+  '纳采', '订盟', '竖柱', '上梁', '造屋', '起基', '定磬', '纳财', '破土', '修坟'
 ]
 
 const JI_LIST = [
@@ -37,9 +34,9 @@ function getGanZhi(year: number, month: number, day: number): { year: string; mo
   const dayCycle = Math.floor((Date.UTC(year, month - 1, day) - Date.UTC(1900, 0, 6)) / 86400000) % 60
   
   return {
-    year: TIANGAN[yearCycle % 10] + DIZHI[yearCycle % 12],
-    month: TIANGAN[monthCycle % 10] + DIZHI[monthCycle % 12],
-    day: TIANGAN[dayCycle % 10] + DIZHI[dayCycle % 12]
+    year: TIANGAN[Math.abs(yearCycle) % 10] + DIZHI[Math.abs(yearCycle) % 12],
+    month: TIANGAN[Math.abs(monthCycle) % 10] + DIZHI[Math.abs(monthCycle) % 12],
+    day: TIANGAN[Math.abs(dayCycle) % 10] + DIZHI[Math.abs(dayCycle) % 12]
   }
 }
 
@@ -74,20 +71,37 @@ function getPengZu(ganZhiDay: string): string {
   return `${tianganChar}不${char1}，${dizhiChar}不${char2}`
 }
 
-export function getLunarInfo(date: Date = new Date()): LunarInfo {
-  const l = lunisolar(date)
+async function getLunar(date: Date) {
+  try {
+    const lunisolar = (await import('lunisolar')).default
+    const l = lunisolar(date)
+    return {
+      year: l.lunar.year,
+      month: l.lunar.month,
+      day: l.lunar.day,
+      solarTerm: l.solarTerm || null
+    }
+  } catch (e) {
+    return {
+      year: date.getFullYear(),
+      month: date.getMonth() + 1,
+      day: date.getDate(),
+      solarTerm: null
+    }
+  }
+}
+
+export async function getLunarInfo(date: Date = new Date()): Promise<LunarInfo> {
+  const lunar = await getLunar(date)
   const year = date.getFullYear()
   const month = date.getMonth() + 1
   const day = date.getDate()
   
-  const lunar = l.lunar
   const ganZhi = getGanZhi(year, month, day)
   const lunarDay = lunar.day
   
   const solarDate = `${year}年${month}月${day}日`
   const lunarDate = `${lunar.year}年${lunar.month}月${lunar.day}日`
-  
-  const 节气 = l.solarTerm || null
   
   const festivals: string[] = []
   if (lunar.month === 1 && lunar.day === 1) festivals.push('春节')
@@ -112,9 +126,7 @@ export function getLunarInfo(date: Date = new Date()): LunarInfo {
     chongSha: `冲${getChongSha(lunarDay)}`,
     sha方位: `煞${getSha方位(ganZhi.day)}`,
     彭祖百忌: getPengZu(ganZhi.day),
-    节气,
-    节日
+    节气: lunar.solarTerm,
+    节日: festivals
   }
 }
-
-export { lunisolar }
