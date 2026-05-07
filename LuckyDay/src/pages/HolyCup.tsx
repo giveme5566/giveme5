@@ -23,7 +23,7 @@ export default function HolyCup() {
       const randomResult = getRandomResult()
       setResult(CUP_RESULTS[randomResult])
       setIsThrowing(false)
-    }, 1500)
+    }, 1800)
   }
 
   const handleReset = () => {
@@ -37,163 +37,237 @@ export default function HolyCup() {
 
   return (
     <PageWrapper title="掷圣杯">
-      <div className="flex flex-col items-center justify-center min-h-[70vh]">
+      <div className="min-h-[70vh] px-4">
         {!hasQuestion ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center"
+            className="flex flex-col items-center justify-center h-[70vh]"
           >
-            <p className="text-gray-600 mb-8 px-8">
-              在心中默念你的问题<br />
-              然后点击下方按钮掷出圣杯
+            <div className="relative mb-8">
+              <svg viewBox="0 0 200 120" className="w-40 h-24">
+                <ellipse cx="100" cy="100" rx="80" ry="12" fill="#f5f5f5" />
+                <path
+                  d="M30 50 Q30 20, 100 10 Q170 20, 170 50 L170 80 Q170 95, 100 100 Q30 95, 30 80 Z"
+                  fill="url(#woodGradient)"
+                  stroke="#d4a574"
+                  strokeWidth="1"
+                  rx="8"
+                />
+                <ellipse cx="100" cy="50" rx="65" ry="18" fill="#e8d4b8" />
+                <defs>
+                  <linearGradient id="woodGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#d4a574" />
+                    <stop offset="50%" stopColor="#c49464" />
+                    <stop offset="100%" stopColor="#b48454" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <p className="text-gray-600 text-center mb-8 px-4 text-lg">
+              在心中默念你的问题
             </p>
-            <button
+            <motion.button
               onClick={handleQuestionClick}
-              className="px-6 py-3 bg-primary-500 text-white rounded-full hover:bg-primary-600 transition-colors"
+              className="px-8 py-3 bg-gradient-to-r from-primary-400 to-primary-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              我已默念问题
-            </button>
+              开始掷杯
+            </motion.button>
           </motion.div>
         ) : (
-          <div className="text-center">
-            <div className="relative w-48 h-48 mb-8">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center"
+          >
+            <div className="relative w-full max-w-[300px] h-[200px] flex items-center justify-center mb-6">
               <AnimatePresence mode="wait">
                 {isThrowing ? (
                   <motion.div
                     key="throwing"
-                    className="absolute inset-0 flex items-center justify-center"
-                    initial={{ rotate: 0 }}
+                    className="flex gap-6"
+                    initial={{ y: -50, rotate: 0 }}
                     animate={{
-                      rotate: [0, -20, 20, -20, 20, 0],
-                      y: [0, -30, 0, -20, 0]
-                    }}
-                    transition={{
-                      duration: 1.2,
-                      ease: "easeInOut"
+                      y: [0, -60, 0, -50, 0],
+                      rotate: [0, -15, 15, -10, 0],
+                      transition: {
+                        duration: 1.5,
+                        times: [0, 0.3, 0.5, 0.7, 1],
+                        ease: "easeInOut"
+                      }
                     }}
                   >
-                    <svg viewBox="0 0 100 100" className="w-full h-full">
-                      <ellipse cx="50" cy="70" rx="35" ry="8" fill="#e5e5e5" />
-                      <path
-                        d="M20 35 Q20 20, 50 20 Q80 20, 80 35 L80 65 Q80 75, 50 75 Q20 75, 20 65 Z"
-                        fill="#d4a574"
-                        stroke="#c49464"
-                        strokeWidth="2"
-                      />
-                      <ellipse cx="50" cy="35" rx="30" ry="12" fill="#e8d4b8" />
-                      <text x="50" y="55" textAnchor="middle" fontSize="24" fill="#8b7355">杯</text>
-                    </svg>
+                    <CupIcon className="w-16 h-16" />
+                    <CupIcon className="w-16 h-16" />
                   </motion.div>
                 ) : result ? (
                   <motion.div
                     key="result"
-                    className="absolute inset-0 flex items-center justify-center"
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: "spring", duration: 0.5 }}
+                    initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    transition={{ type: "spring", duration: 0.6 }}
                   >
                     <ResultDisplay result={result} />
                   </motion.div>
                 ) : (
                   <motion.div
                     key="idle"
-                    className="absolute inset-0 flex items-center justify-center"
+                    className="flex gap-6"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                   >
-                    <svg viewBox="0 0 100 100" className="w-full h-full">
-                      <ellipse cx="50" cy="70" rx="35" ry="8" fill="#e5e5e5" />
-                      <path
-                        d="M20 35 Q20 20, 50 20 Q80 20, 80 35 L80 65 Q80 75, 50 75 Q20 75, 20 65 Z"
-                        fill="#d4a574"
-                        stroke="#c49464"
-                        strokeWidth="2"
-                      />
-                      <ellipse cx="50" cy="35" rx="30" ry="12" fill="#e8d4b8" />
-                      <text x="50" y="55" textAnchor="middle" fontSize="24" fill="#8b7355">杯</text>
-                    </svg>
+                    <CupIcon className="w-16 h-16" />
+                    <CupIcon className="w-16 h-16" />
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
             {!result && (
-              <button
+              <motion.button
                 onClick={handleThrow}
                 disabled={isThrowing}
-                className="px-8 py-4 bg-primary-500 text-white rounded-full text-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-10 py-4 bg-gradient-to-r from-primary-400 to-primary-500 text-white rounded-full shadow-lg text-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={{ scale: isThrowing ? 1 : 1.05 }}
+                whileTap={{ scale: isThrowing ? 1 : 0.95 }}
               >
-                {isThrowing ? '掷杯中...' : '掷圣杯'}
-              </button>
+                {isThrowing ? (
+                  <span className="flex items-center gap-2">
+                    <motion.span
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className="inline-block"
+                    >
+                      🎲
+                    </motion.span>
+                    掷杯中...
+                  </span>
+                ) : (
+                  '掷圣杯'
+                )}
+              </motion.button>
             )}
 
             {result && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="space-y-4"
+                className="text-center space-y-4"
               >
-                <button
+                <motion.button
                   onClick={handleThrow}
-                  className="px-6 py-3 bg-primary-500 text-white rounded-full hover:bg-primary-600 transition-colors"
+                  className="px-8 py-3 bg-gradient-to-r from-primary-400 to-primary-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   再掷一次
-                </button>
+                </motion.button>
                 <button
                   onClick={handleReset}
-                  className="block mx-auto px-6 py-2 text-gray-500 hover:text-gray-700"
+                  className="block mx-auto px-6 py-2 text-gray-500 hover:text-gray-700 text-sm"
                 >
                   重新提问
                 </button>
               </motion.div>
             )}
-          </div>
+          </motion.div>
         )}
       </div>
     </PageWrapper>
   )
 }
 
+function CupIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 80 50" className={className}>
+      <ellipse cx="40" cy="45" rx="30" ry="4" fill="#f0f0f0" />
+      <path
+        d="M15 20 Q15 5, 40 2 Q65 5, 65 20 L65 35 Q65 42, 40 45 Q15 42, 15 35 Z"
+        fill="url(#cupGradient)"
+        stroke="#c49464"
+        strokeWidth="0.5"
+      />
+      <ellipse cx="40" cy="20" rx="22" ry="6" fill="#e8d4b8" />
+      <defs>
+        <linearGradient id="cupGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#d4a574" />
+          <stop offset="30%" stopColor="#e0b888" />
+          <stop offset="70%" stopColor="#d4a574" />
+          <stop offset="100%" stopColor="#b48454" />
+        </linearGradient>
+      </defs>
+    </svg>
+  )
+}
+
 function ResultDisplay({ result }: { result: CupResultInfo }) {
   const isShengbei = result.type === 'shengbei'
   const isNegative = result.type === 'xiaobei-yin'
+  
+  const getCupColors = () => {
+    if (isShengbei) return { bg: '#e8f5e9', stroke: '#4CAF50', text: '#2e7d32' }
+    if (isNegative) return { bg: '#ffebee', stroke: '#f44336', text: '#c62828' }
+    return { bg: '#fff8e1', stroke: '#FFC107', text: '#e65100' }
+  }
+  
+  const colors = getCupColors()
 
   return (
-    <div className="text-center">
-      <svg viewBox="0 0 120 80" className="w-32 h-24 mx-auto mb-4">
-        <ellipse cx="60" cy="70" rx="50" ry="8" fill="#e5e5e5" />
-        <path
-          d="M15 30 Q15 15, 60 15 Q105 15, 105 30 L105 55 Q105 65, 60 65 Q15 65, 15 55 Z"
-          fill={isShengbei ? '#4CAF50' : isNegative ? '#f44336' : '#FFC107'}
-          stroke={isShengbei ? '#388E3C' : isNegative ? '#D32F2F' : '#FFA000'}
-          strokeWidth="2"
-        />
-        <ellipse cx="60" cy="30" rx="45" ry="12" fill={isShengbei ? '#81C784' : isNegative ? '#E57373' : '#FFD54F'} />
-        {result.type === 'shengbei' && (
-          <>
-            <circle cx="45" cy="35" r="8" fill="#FFFFFF" />
-            <circle cx="75" cy="35" r="8" fill="#333" />
-          </>
-        )}
-        {result.type === 'xiaobei-yin' && (
-          <>
-            <circle cx="45" cy="35" r="8" fill="#333" />
-            <circle cx="75" cy="35" r="8" fill="#333" />
-          </>
-        )}
-        {result.type === 'xiaobei-yang' && (
-          <>
-            <circle cx="45" cy="35" r="8" fill="#FFFFFF" />
-            <circle cx="75" cy="35" r="8" fill="#FFFFFF" />
-          </>
-        )}
-      </svg>
-      <h2 className="text-2xl font-bold mb-2" style={{ color: isShengbei ? '#4CAF50' : isNegative ? '#f44336' : '#FFC107' }}>
+    <div className="flex flex-col items-center">
+      <div 
+        className="rounded-2xl p-6 mb-4"
+        style={{ backgroundColor: colors.bg }}
+      >
+        <div className="flex gap-4">
+          <CupResultIcon 
+            className="w-14 h-14" 
+            isUp={result.type === 'shengbei' || result.type === 'xiaobei-yang'}
+            colors={colors}
+          />
+          <CupResultIcon 
+            className="w-14 h-14" 
+            isUp={result.type === 'shengbei' || result.type === 'xiaobei-yin'}
+            colors={colors}
+          />
+        </div>
+      </div>
+      <motion.h2 
+        className="text-2xl font-bold mb-2"
+        style={{ color: colors.text }}
+        initial={{ scale: 1.2 }}
+        animate={{ scale: 1 }}
+      >
         {result.name}
-      </h2>
-      <p className="text-gray-500 mb-2">{result.description}</p>
-      <p className="text-gray-700 font-medium">{result.meaning}</p>
+      </motion.h2>
+      <p className="text-gray-500 text-sm mb-2">{result.description}</p>
+      <p className="text-gray-700 font-medium text-center px-4">{result.meaning}</p>
     </div>
+  )
+}
+
+function CupResultIcon({ className, isUp, colors }: { 
+  className?: string 
+  isUp: boolean
+  colors: { bg: string; stroke: string; text: string }
+}) {
+  return (
+    <motion.svg 
+      viewBox="0 0 80 50" 
+      className={className}
+      initial={{ rotate: isUp ? 180 : 0 }}
+      animate={{ rotate: isUp ? 180 : 0 }}
+      transition={{ type: "spring", duration: 0.5 }}
+    >
+      <ellipse cx="40" cy="45" rx="30" ry="4" fill="#f0f0f0" />
+      <path
+        d="M15 20 Q15 5, 40 2 Q65 5, 65 20 L65 35 Q65 42, 40 45 Q15 42, 15 35 Z"
+        fill="#d4a574"
+        stroke={colors.stroke}
+        strokeWidth="1.5"
+      />
+      <ellipse cx="40" cy="20" rx="22" ry="6" fill="#e8d4b8" stroke={colors.stroke} strokeWidth="1" />
+    </motion.svg>
   )
 }
