@@ -5,6 +5,18 @@ import type { LunarInfo } from '../utils/lunar'
 
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六']
 
+function toChineseMonth(month: number): string {
+  const months = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊']
+  return months[month - 1]
+}
+
+function toChineseDay(day: number): string {
+  const days = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+    '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+    '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十']
+  return days[day - 1] || String(day)
+}
+
 export default function Fortune() {
   const [lunarInfo, setLunarInfo] = useState<LunarInfo | null>(null)
   const [currentDate] = useState(new Date())
@@ -54,8 +66,14 @@ export default function Fortune() {
   const weekday = WEEKDAYS[currentDate.getDay()]
   const month = currentDate.getMonth() + 1
   const year = currentDate.getFullYear()
-
   const ganZhiYear = lunarInfo.ganZhiYear
+
+  const lunarDateStr = lunarInfo.lunarDate
+  const lunarMonth = lunarDateStr.includes('年') ? parseInt(lunarDateStr.split('年')[1].split('月')[0]) : 1
+  const lunarDay = lunarDateStr.includes('月') ? parseInt(lunarDateStr.split('月')[1].replace('日', '')) : 1
+
+  const isHoliday = lunarInfo.节日.length > 0
+  const holidayColor = isHoliday ? 'text-rose-500' : 'text-gray-800'
 
   return (
     <PageWrapper title="今日运势">
@@ -67,17 +85,21 @@ export default function Fortune() {
             
             <div 
               ref={cardRef}
-              className="relative bg-white rounded-3xl p-6 shadow-sm border border-gray-50"
+              className={`relative rounded-3xl p-6 shadow-sm border border-gray-50 ${
+                isHoliday ? 'bg-rose-50' : 'bg-white'
+              }`}
             >
               <div className="text-center mb-6">
-                <div className="text-6xl font-light text-gray-800 mb-2">{day}</div>
+                <div className={`text-6xl font-light ${holidayColor} mb-2`}>
+                  {toChineseDay(lunarDay)}
+                </div>
                 <div className="text-sm text-gray-400">
-                  {year}.{String(month).padStart(2, '0')} · 周{weekday}
+                  {toChineseMonth(lunarMonth)}月 · 周{weekday}
                 </div>
               </div>
 
               <div className="text-center text-xs text-gray-500 mb-6 pb-6 border-b border-gray-100">
-                <span className="mr-2">{lunarInfo.lunarDate}</span>
+                <span className="mr-2">{year}.{String(month).padStart(2, '0')}</span>
                 <span className="text-gray-300 mx-1">·</span>
                 <span className="mr-2">{ganZhiYear}</span>
                 <span className="text-gray-300 mx-1">·</span>
@@ -128,7 +150,7 @@ export default function Fortune() {
                 <div className="mt-6 pt-4 border-t border-gray-100">
                   <div className="flex justify-center gap-2">
                     {lunarInfo.节日.map((festival) => (
-                      <span key={festival} className="text-xs text-gray-500">
+                      <span key={festival} className="text-xs text-rose-500 font-medium">
                         {festival}
                       </span>
                     ))}
