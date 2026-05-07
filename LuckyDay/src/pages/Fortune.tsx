@@ -32,81 +32,55 @@ export default function Fortune() {
 
   return (
     <PageWrapper title="今日运势">
-      <div className="px-5 py-6">
+      <div className="px-5 py-4">
         <div className="max-w-md mx-auto">
-          <div className="bg-white rounded-3xl p-6 mb-4">
-            <div className="text-center mb-4">
-              <div className="text-7xl font-thin text-gray-800 tracking-tighter leading-none mb-3">
-                {day}
-              </div>
-              <div className="text-xs text-gray-400 tracking-widest">
-                {year}.{String(month).padStart(2, '0')} · 星期{weekday}
-              </div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-xs text-gray-400">
+              {lunarInfo.zodiac}年 · {lunarInfo.lunarDate}
             </div>
-            
-            <div className="flex items-center justify-center gap-2 text-xs">
-              <span className="px-2 py-0.5 bg-amber-50 text-amber-500 rounded-full">
-                {lunarInfo.zodiac}年
-              </span>
-              <span className="text-gray-300">·</span>
-              <span className="text-gray-400">{lunarInfo.lunarDate}</span>
-              {lunarInfo.节气 && (
-                <>
-                  <span className="text-gray-300">·</span>
-                  <span className="text-gray-400">{lunarInfo.节气}</span>
-                </>
-              )}
+            <div className="text-xs text-gray-400">
+              {lunarInfo.节气 || (lunarInfo.节日.length > 0 ? lunarInfo.节日.join(' ') : '')}
             </div>
-            
-            {lunarInfo.节日.length > 0 && (
-              <div className="flex justify-center gap-2 mt-2">
-                {lunarInfo.节日.map((festival) => (
-                  <span key={festival} className="text-xs text-rose-400">
-                    {festival}
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
 
-          <div className="space-y-3">
-            <div className="bg-white rounded-3xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center">
-                  <span className="text-emerald-500 text-xs">宜</span>
-                </div>
-                <span className="text-sm font-medium text-gray-700">今日宜做</span>
-              </div>
-              <div className="grid grid-cols-5 gap-2">
-                {lunarInfo.yi.map((item) => (
-                  <div
-                    key={item}
-                    className="bg-emerald-50 rounded-xl py-2 px-1 text-center"
-                  >
-                    <span className="text-xs text-emerald-600">{item}</span>
-                  </div>
-                ))}
-              </div>
+          <div className="bg-white rounded-3xl p-5 mb-3">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-sm font-medium text-gray-700">宜</span>
+              <div className="flex-1 h-px bg-gray-100"></div>
             </div>
+            <div className="flex flex-wrap gap-2">
+              {lunarInfo.yi.map((item) => (
+                <span
+                  key={item}
+                  className="px-3 py-1.5 bg-slate-50 rounded-full text-xs text-gray-600"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
 
-            <div className="bg-white rounded-3xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 bg-rose-100 rounded-full flex items-center justify-center">
-                  <span className="text-rose-500 text-xs">忌</span>
-                </div>
-                <span className="text-sm font-medium text-gray-700">今日不宜</span>
-              </div>
-              <div className="grid grid-cols-5 gap-2">
-                {lunarInfo.ji.map((item) => (
-                  <div
-                    key={item}
-                    className="bg-rose-50 rounded-xl py-2 px-1 text-center"
-                  >
-                    <span className="text-xs text-rose-600">{item}</span>
-                  </div>
-                ))}
-              </div>
+          <div className="bg-white rounded-3xl p-5 mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-sm font-medium text-gray-700">忌</span>
+              <div className="flex-1 h-px bg-gray-100"></div>
             </div>
+            <div className="flex flex-wrap gap-2">
+              {lunarInfo.ji.map((item) => (
+                <span
+                  key={item}
+                  className="px-3 py-1.5 bg-slate-50 rounded-full text-xs text-gray-600"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="text-center text-xs text-gray-400">
+            <span className="font-medium">{year}.{String(month).padStart(2, '0')}.{String(day).padStart(2, '0')}</span>
+            <span className="mx-2">·</span>
+            <span>星期{weekday}</span>
           </div>
         </div>
       </div>
