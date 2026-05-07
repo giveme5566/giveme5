@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import PageWrapper from '../components/PageWrapper'
 import { getLunarInfo } from '../utils/lunar'
 import type { LunarInfo } from '../utils/lunar'
@@ -28,12 +28,37 @@ function getGanZhiYear(year: number): string {
 export default function Fortune() {
   const [lunarInfo, setLunarInfo] = useState<LunarInfo | null>(null)
   const [currentDate] = useState(new Date())
+  const [isSharing, setIsSharing] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     getLunarInfo().then(info => {
       setLunarInfo(info)
     })
   }, [])
+
+  const handleShare = async () => {
+    if (!cardRef.current) return
+    setIsSharing(true)
+
+    try {
+      const html2canvas = (await import('html2canvas')).default
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+      })
+
+      const link = document.createElement('a')
+      link.download = `今日运势_${new Date().toISOString().split('T')[0]}.png`
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+    } catch (error) {
+      console.error('分享失败:', error)
+    } finally {
+      setIsSharing(false)
+    }
+  }
 
   if (!lunarInfo) {
     return (
@@ -62,7 +87,10 @@ export default function Fortune() {
             <div className="absolute inset-0 bg-white rounded-3xl transform rotate-1 shadow-sm"></div>
             <div className="absolute inset-0 bg-white rounded-3xl transform -rotate-0.5 shadow-sm"></div>
             
-            <div className="relative bg-white rounded-3xl p-6 shadow-sm border border-gray-50">
+            <div 
+              ref={cardRef}
+              className="relative bg-white rounded-3xl p-6 shadow-sm border border-gray-50"
+            >
               <div className="grid grid-cols-7 gap-1 mb-4">
                 {WEEKDAYS.map((w, index) => (
                   <div 
@@ -155,6 +183,14 @@ export default function Fortune() {
               </div>
             </div>
           </div>
+
+          <button
+            onClick={handleShare}
+            disabled={isSharing}
+            className="w-full mt-4 py-3 bg-gray-800 text-white rounded-2xl text-sm font-medium hover:bg-gray-700 transition-colors disabled:opacity-50"
+          >
+            {isSharing ? '生成中...' : '保存图片'}
+          </button>
         </div>
       </div>
     </PageWrapper>
