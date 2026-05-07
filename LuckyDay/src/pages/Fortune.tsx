@@ -4,8 +4,11 @@ import { getLunarInfo } from '../utils/lunar'
 import type { LunarInfo } from '../utils/lunar'
 
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六']
-const TIANGAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸']
-const DIZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥']
+
+function toChineseMonth(month: number): string {
+  const months = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊']
+  return months[month - 1]
+}
 
 function toChineseDay(day: number): string {
   const days = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
@@ -65,10 +68,9 @@ export default function Fortune() {
   const year = currentDate.getFullYear()
 
   const lunarDateStr = lunarInfo.lunarDate
-  const lunarMonth = lunarDateStr.includes('年') ? lunarDateStr.split('年')[1].split('月')[0] : '正'
-  const lunarDay = lunarDateStr.includes('月') ? lunarDateStr.split('月')[1].replace('日', '') : '初一'
-
-  const ganZhiYear = lunarInfo.ganZhiYear || TIANGAN[(year - 4) % 60 % 10] + DIZHI[(year - 4) % 60 % 12]
+  const lunarMonth = lunarDateStr.includes('年') ? parseInt(lunarDateStr.split('年')[1].split('月')[0]) : 1
+  const lunarDay = lunarDateStr.includes('月') ? parseInt(lunarDateStr.split('月')[1].replace('日', '')) : 1
+  const ganZhiYear = lunarInfo.ganZhiYear
 
   return (
     <PageWrapper title="今日运势">
@@ -82,25 +84,34 @@ export default function Fortune() {
               ref={cardRef}
               className="relative bg-white rounded-3xl p-6 shadow-sm border border-gray-50"
             >
-              <div className="text-center mb-4">
-                <span className="text-xs text-gray-400">周{weekday}</span>
-              </div>
-
               <div className="flex gap-4 mb-4">
                 <div className="flex-1 text-center pb-4 border-b border-gray-100">
                   <div className="text-5xl font-light text-gray-800 mb-1">{day}</div>
-                  <div className="text-xs text-gray-400">{year}.{String(month).padStart(2, '0')}</div>
+                  <div className="text-xs text-gray-400">{year}.{String(month).padStart(2, '0')} · 周{weekday}</div>
                 </div>
 
                 <div className="w-px bg-gray-100"></div>
 
                 <div className="flex-1 text-center pb-4 border-b border-gray-100">
-                  <div className="text-3xl font-light text-gray-700 mb-1">{toChineseDay(parseInt(lunarDay) || 1)}</div>
+                  <div className="text-3xl font-light text-gray-700 mb-1">
+                    {toChineseMonth(lunarMonth)}月
+                  </div>
                   <div className="text-xs text-gray-400">
-                    {ganZhiYear} · {lunarInfo.zodiac}肖
-                    {lunarInfo.节气 && ` · ${lunarInfo.节气}`}
+                    {toChineseDay(lunarDay)}
                   </div>
                 </div>
+              </div>
+
+              <div className="flex justify-center gap-4 text-xs text-gray-400 mb-4 pb-4 border-b border-gray-100">
+                <span>{ganZhiYear}年</span>
+                <span className="text-gray-300">·</span>
+                <span>{lunarInfo.zodiac}肖</span>
+                {lunarInfo.节气 && (
+                  <>
+                    <span className="text-gray-300">·</span>
+                    <span>{lunarInfo.节气}</span>
+                  </>
+                )}
               </div>
 
               <div className="space-y-3">
