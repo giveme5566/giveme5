@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import PageWrapper from '../components/PageWrapper'
-import { CUP_RESULTS, CupResult, CupResultInfo } from '../types/holyCup'
+import { CUP_RESULTS } from '../types/holyCup'
+import type { CupResult, CupResultInfo } from '../types/holyCup'
 
 function getRandomResult(): CupResult {
   const results: CupResult[] = ['shengbei', 'xiaobei-yin', 'xiaobei-yang']
