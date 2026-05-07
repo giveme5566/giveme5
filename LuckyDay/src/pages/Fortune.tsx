@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import PageWrapper from '../components/PageWrapper'
-import { getLunarInfo, LunarInfo } from '../utils/lunar'
+import { getLunarInfo } from '../utils/lunar'
+import type { LunarInfo } from '../utils/lunar'
 
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六']
 
