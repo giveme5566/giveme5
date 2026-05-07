@@ -19,7 +19,8 @@ function toChineseDay(day: number): string {
 
 export default function Fortune() {
   const [lunarInfo, setLunarInfo] = useState<LunarInfo | null>(null)
-  const [currentDate] = useState(new Date())
+  const dragonBoatDate = new Date(2026, 4, 31)
+  const [currentDate] = useState(dragonBoatDate)
   const [isSharing, setIsSharing] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
