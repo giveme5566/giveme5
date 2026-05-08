@@ -159,69 +159,121 @@ function TodayFortune({ fortune }: { fortune: DailyFortune }) {
 }
 
 function WeekFortune({ sign }: { sign: ZodiacSign }) {
-  const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-  const weekFortunes = [
-    { day: '周一', overall: 85, focus: '工作' },
-    { day: '周二', overall: 78, focus: '人际' },
-    { day: '周三', overall: 92, focus: '财运' },
-    { day: '周四', overall: 75, focus: '健康' },
-    { day: '周五', overall: 88, focus: '感情' },
-    { day: '周六', overall: 95, focus: '休闲' },
-    { day: '周日', overall: 82, focus: '家庭' },
-  ]
-  
+  // 基于星座生成本周运势数据
+  const seed = sign.id.charCodeAt(0) + 100
+  const random = (min: number, max: number) => {
+    const x = Math.sin(seed + min) * 10000
+    return Math.floor((x - Math.floor(x)) * (max - min + 1)) + min
+  }
+
+  const weekFortune = {
+    overall: random(72, 92),
+    love: random(65, 95),
+    career: random(68, 93),
+    wealth: random(60, 88),
+    health: random(72, 94)
+  }
+
+  const summaries: Record<string, string[]> = {
+    '火': ['本周充满活力，适合推进重要项目', '热情高涨，人际关系将迎来突破', '创意迸发，把握机会展现领导才能'],
+    '土': ['稳扎稳打，本周适合处理积累的事务', '脚踏实地，努力将获得回报', '保持耐心，长期计划开始见效'],
+    '风': ['思维敏捷，本周适合学习新技能', '社交活跃，可能结识重要伙伴', '灵感涌现，创意项目进展顺利'],
+    '水': ['直觉敏锐，相信内心的判断', '情感丰富，适合深化重要关系', '静水流深，内在成长显著']
+  }
+
+  const advices: Record<string, string[]> = {
+    '火': ['保持热情但注意节奏，避免过度疲劳', '分享你的能量，但留出独处时间', '勇敢追求目标，同时倾听反馈'],
+    '土': ['适当放松，给自己一些弹性空间', '享受过程，不要只关注结果', '相信积累，但也要注意变通'],
+    '风': ['多倾听他人，平衡表达与吸收', '把创意落实到具体行动', '保持开放，但也要有主见'],
+    '水': ['照顾情绪，同时保持理性判断', '与信任的人分享内心感受', '给自己独处充电的时间']
+  }
+
+  const summary = summaries[sign.element][random(0, 2)]
+  const advice = advices[sign.element][random(0, 2)]
+
   return (
     <div className="space-y-4">
-      <div className="text-sm text-gray-600 leading-relaxed">
-        本周{sign.name}整体运势平稳，{sign.element === '火' ? '热情高涨适合开展新计划' : sign.element === '土' ? '脚踏实地会有不错收获' : sign.element === '风' ? '思维活跃适合学习交流' : '直觉敏锐相信内心感受'}。
+      <div className="text-center py-4">
+        <div className="text-4xl font-light text-indigo-500 mb-1">{weekFortune.overall}</div>
+        <div className="text-sm text-gray-500">本周综合</div>
       </div>
-      
-      <div className="space-y-2">
-        {weekFortunes.map((item, idx) => (
-          <div key={item.day} className="flex items-center gap-3 py-2">
-            <span className="text-xs text-gray-500 w-10">{item.day}</span>
-            <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-indigo-400 to-purple-400"
-                style={{ width: `${item.overall}%` }}
-              />
-            </div>
-            <span className="text-xs text-gray-400">{item.focus}</span>
-          </div>
-        ))}
+
+      <div className="space-y-3">
+        <FortuneBar label="爱情" value={weekFortune.love} color="bg-pink-400" />
+        <FortuneBar label="事业" value={weekFortune.career} color="bg-blue-400" />
+        <FortuneBar label="财运" value={weekFortune.wealth} color="bg-amber-400" />
+        <FortuneBar label="健康" value={weekFortune.health} color="bg-green-400" />
+      </div>
+
+      <div className="pt-4 border-t border-gray-200/50 space-y-3">
+        <div>
+          <div className="text-xs text-gray-400 mb-1">本周概述</div>
+          <p className="text-sm text-gray-700 leading-relaxed">{summary}</p>
+        </div>
+        <div>
+          <div className="text-xs text-gray-400 mb-1">建议</div>
+          <p className="text-sm text-gray-700 leading-relaxed">{advice}</p>
+        </div>
       </div>
     </div>
   )
 }
 
 function MonthFortune({ sign }: { sign: ZodiacSign }) {
+  // 基于星座生成本月运势数据
+  const seed = sign.id.charCodeAt(0) + 200
+  const random = (min: number, max: number) => {
+    const x = Math.sin(seed + min) * 10000
+    return Math.floor((x - Math.floor(x)) * (max - min + 1)) + min
+  }
+
+  const monthFortune = {
+    overall: random(75, 93),
+    love: random(68, 96),
+    career: random(70, 94),
+    wealth: random(62, 90),
+    health: random(74, 95)
+  }
+
+  const summaries: Record<string, string[]> = {
+    '火': ['本月充满活力与机遇，是推进计划的好时机', '热情高涨的月份，人际关系和事业都将有突破', '创意与行动力兼具，大胆追求你的目标'],
+    '土': ['稳扎稳打的月份，长期努力开始收获成果', '务实前行的时期，适合巩固已有基础', '耐心与坚持将带来意想不到的回报'],
+    '风': ['思维活跃的月份，新想法和新机会不断涌现', '社交与学习的好时机，拓展视野与人脉', '变化与成长并存，保持灵活应对'],
+    '水': ['情感丰富的月份，内在直觉格外敏锐', '适合深度思考与自我探索的时期', '在宁静中发现力量，情感关系深化']
+  }
+
+  const advices: Record<string, string[]> = {
+    '火': ['把握机会，但也要注意劳逸结合', '热情待人，同时保持独立思考', '勇往直前，但记得适时调整方向'],
+    '土': ['在稳定中寻求适度的变化与创新', '享受成果的同时继续积累', '保持务实，但也不要过于保守'],
+    '风': ['广泛收集信息，然后聚焦重点行动', '在变化中保持核心的稳定', '分享你的想法，也倾听他人的声音'],
+    '水': ['相信直觉，同时用理性验证', '在关心他人时也照顾好自己', '给自己足够的休息和反思时间']
+  }
+
+  const summary = summaries[sign.element][random(0, 2)]
+  const advice = advices[sign.element][random(0, 2)]
+
   return (
     <div className="space-y-4">
-      <div className="text-sm text-gray-600 leading-relaxed">
-        本月{sign.name}将迎来{sign.element === '火' ? '充满活力的时期' : sign.element === '土' ? '稳步前进的阶段' : sign.element === '风' ? '思想碰撞的月份' : '情感丰富的时光'}。
-        整体运势呈上升趋势，适合{sign.element === '火' ? '大胆尝试新事物' : sign.element === '土' ? '专注长期目标' : sign.element === '风' ? '拓展社交圈子' : '深化人际关系'}。
+      <div className="text-center py-4">
+        <div className="text-4xl font-light text-indigo-500 mb-1">{monthFortune.overall}</div>
+        <div className="text-sm text-gray-500">本月综合</div>
       </div>
-      
-      <div className="grid grid-cols-2 gap-3 pt-2">
-        <div className="bg-white/50 rounded-xl p-3">
-          <div className="text-xs text-gray-400 mb-1">事业运</div>
-          <div className="text-sm font-medium text-gray-700">★★★★☆</div>
-          <div className="text-xs text-gray-500 mt-1">稳步上升</div>
+
+      <div className="space-y-3">
+        <FortuneBar label="爱情" value={monthFortune.love} color="bg-pink-400" />
+        <FortuneBar label="事业" value={monthFortune.career} color="bg-blue-400" />
+        <FortuneBar label="财运" value={monthFortune.wealth} color="bg-amber-400" />
+        <FortuneBar label="健康" value={monthFortune.health} color="bg-green-400" />
+      </div>
+
+      <div className="pt-4 border-t border-gray-200/50 space-y-3">
+        <div>
+          <div className="text-xs text-gray-400 mb-1">本月概述</div>
+          <p className="text-sm text-gray-700 leading-relaxed">{summary}</p>
         </div>
-        <div className="bg-white/50 rounded-xl p-3">
-          <div className="text-xs text-gray-400 mb-1">财运</div>
-          <div className="text-sm font-medium text-gray-700">★★★☆☆</div>
-          <div className="text-xs text-gray-500 mt-1">谨慎理财</div>
-        </div>
-        <div className="bg-white/50 rounded-xl p-3">
-          <div className="text-xs text-gray-400 mb-1">感情运</div>
-          <div className="text-sm font-medium text-gray-700">★★★★☆</div>
-          <div className="text-xs text-gray-500 mt-1">桃花朵朵</div>
-        </div>
-        <div className="bg-white/50 rounded-xl p-3">
-          <div className="text-xs text-gray-400 mb-1">健康运</div>
-          <div className="text-sm font-medium text-gray-700">★★★☆☆</div>
-          <div className="text-xs text-gray-500 mt-1">注意休息</div>
+        <div>
+          <div className="text-xs text-gray-400 mb-1">建议</div>
+          <p className="text-sm text-gray-700 leading-relaxed">{advice}</p>
         </div>
       </div>
     </div>
