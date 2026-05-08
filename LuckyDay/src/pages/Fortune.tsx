@@ -81,7 +81,7 @@ export default function Fortune() {
   const toArabicNumber = (num: string): number => {
     const chineseNums: Record<string, number> = {
       '正': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10,
-      '冬': 11, '腊': 12, '初': 0, '十': 10, '廿': 20, '三十': 30
+      '冬': 11, '腊': 12, '初': 0, '廿': 20, '三十': 30
     }
     return chineseNums[num] || parseInt(num) || 1
   }
