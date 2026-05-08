@@ -19,12 +19,13 @@ function toChineseDay(day: number): string {
 
 export default function Fortune() {
   const [lunarInfo, setLunarInfo] = useState<LunarInfo | null>(null)
-  const [currentDate] = useState(new Date())
+  // 临时设置为2026年6月19日（端午节）用于预览
+  const [currentDate] = useState(new Date(2026, 5, 19))
   const [isSharing, setIsSharing] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    getLunarInfo().then(info => {
+    getLunarInfo(currentDate).then(info => {
       setLunarInfo(info)
     })
   }, [])
