@@ -290,10 +290,38 @@ export const answers: Answer[] = [
   { id: 273, text: "小心你的直觉，它可能错了", type: 'cautionary' }
 ]
 
-// 获取随机答案
+// 历史记录（用于避免连续同类型）
+let recentTypes: Answer['type'][] = []
+const MAX_RECENT_TYPES = 3 // 记录最近3次类型，避免重复
+
+// 获取随机答案（避免连续同类型）
 export function getRandomAnswer(): Answer {
-  const randomIndex = Math.floor(Math.random() * answers.length)
-  return answers[randomIndex]
+  // 获取可选类型（排除最近出现的类型）
+  const availableTypes = (['warm', 'playful', 'philosophical', 'cautionary'] as const)
+    .filter(type => !recentTypes.includes(type))
+  
+  // 如果所有类型都被排除了（初始状态或特殊情况），重置历史
+  const typesToUse = availableTypes.length > 0 ? availableTypes : ['warm', 'playful', 'philosophical', 'cautionary'] as const
+  
+  // 随机选择一个类型
+  const selectedType = typesToUse[Math.floor(Math.random() * typesToUse.length)]
+  
+  // 从该类型中随机选择一条答案
+  const typeAnswers = answers.filter(a => a.type === selectedType)
+  const randomAnswer = typeAnswers[Math.floor(Math.random() * typeAnswers.length)]
+  
+  // 更新历史记录
+  recentTypes.push(selectedType)
+  if (recentTypes.length > MAX_RECENT_TYPES) {
+    recentTypes.shift() // 移除最旧的记录
+  }
+  
+  return randomAnswer
+}
+
+// 重置历史记录（用于测试或新会话）
+export function resetAnswerHistory() {
+  recentTypes = []
 }
 
 // 根据类型获取答案
