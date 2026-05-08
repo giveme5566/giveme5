@@ -14,26 +14,18 @@ function ZodiacCard({ sign, onClick }: { sign: ZodiacSign; onClick: () => void }
         hover:scale-[1.02] hover:shadow-xl hover:-translate-y-1
         active:scale-[0.98] active:translate-y-0`}
     >
-      {/* 悬停光晕效果 */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       
       <div className="relative">
-        {/* 星座符号 */}
         <div className="text-4xl mb-3 font-light tracking-tight text-gray-800/90">
           {sign.symbol}
         </div>
-        
-        {/* 星座名称 */}
         <div className="font-medium text-gray-800 text-[15px] tracking-wide">
           {sign.name}
         </div>
-        
-        {/* 日期范围 */}
         <div className="text-[11px] text-gray-500 mt-1.5 font-normal tracking-wide">
           {sign.dateRange}
         </div>
-        
-        {/* 元素标签 */}
         <div className="absolute top-0 right-0">
           <span className="text-[10px] font-medium text-gray-400/80 tracking-wider uppercase">
             {sign.element}
@@ -95,9 +87,7 @@ function ZodiacDetail({ sign, onBack }: { sign: ZodiacSign; onBack: () => void }
       <div className="max-w-md mx-auto">
         <BackButton onBack={onBack} />
 
-        {/* 主卡片 */}
         <div className={`rounded-3xl p-6 border ${bgColorClass} mb-5`}>
-          {/* 头部信息 */}
           <div className="flex items-center gap-5 mb-6">
             <div className="text-5xl font-light text-gray-800/90">{sign.symbol}</div>
             <div>
@@ -106,7 +96,6 @@ function ZodiacDetail({ sign, onBack }: { sign: ZodiacSign; onBack: () => void }
             </div>
           </div>
 
-          {/* 标签切换 */}
           <div className="flex gap-1 p-1 bg-white/50 rounded-2xl mb-6">
             {(['today', 'week', 'month'] as const).map((tab) => (
               <button
@@ -123,7 +112,6 @@ function ZodiacDetail({ sign, onBack }: { sign: ZodiacSign; onBack: () => void }
             ))}
           </div>
 
-          {/* 运势内容 */}
           <div className="space-y-4">
             {activeTab === 'today' && <TodayFortune data={horoscopeData.today} />}
             {activeTab === 'week' && <WeekFortune data={horoscopeData.week} />}
@@ -131,7 +119,6 @@ function ZodiacDetail({ sign, onBack }: { sign: ZodiacSign; onBack: () => void }
           </div>
         </div>
 
-        {/* 幸运信息卡片 */}
         <div className="grid grid-cols-2 gap-3">
           <InfoCard label="幸运数字" value={sign.luckyNumbers.join(' · ')} />
           <InfoCard label="幸运颜色" value={sign.luckyColors.join(' · ')} />
@@ -204,18 +191,15 @@ function LuckyInfo({ items }: { items: { label: string; value: string }[] }) {
 function TodayFortune({ data }: { data: HoroscopeData['today'] }) {
   return (
     <div className="space-y-3">
-      {/* 概述 */}
       <div className="bg-white/70 rounded-xl p-4 border border-white/50">
         <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">今日概述</div>
         <p className="text-sm text-gray-700 leading-relaxed">{data.summary}</p>
       </div>
 
-      {/* 各项运势 */}
       {data.love && <FortuneSection title="爱情运势" content={data.love} color="pink" />}
       {data.work && <FortuneSection title="事业运势" content={data.work} color="blue" />}
       {data.wealth && <FortuneSection title="财富运势" content={data.wealth} color="amber" />}
 
-      {/* 幸运信息 */}
       <LuckyInfo items={[
         { label: '幸运数字', value: data.luckyNumber },
         { label: '幸运颜色', value: data.luckyColor },
@@ -223,7 +207,6 @@ function TodayFortune({ data }: { data: HoroscopeData['today'] }) {
         { label: '贵人星座', value: data.luckyStar }
       ]} />
 
-      {/* 注意事项 */}
       {data.notice && (
         <div className="bg-amber-50/70 rounded-xl p-4 border border-amber-100/50 mt-3">
           <div className="text-[11px] text-amber-600/80 uppercase tracking-wider mb-1.5">今日提醒</div>
@@ -237,19 +220,16 @@ function TodayFortune({ data }: { data: HoroscopeData['today'] }) {
 function WeekFortune({ data }: { data: HoroscopeData['week'] }) {
   return (
     <div className="space-y-3">
-      {/* 概述 */}
       <div className="bg-white/70 rounded-xl p-4 border border-white/50">
         <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">本周概述</div>
         <p className="text-sm text-gray-700 leading-relaxed">{data.summary}</p>
       </div>
 
-      {/* 各项运势 */}
       {data.love && <FortuneSection title="爱情运势" content={data.love} color="pink" />}
       {data.work && <FortuneSection title="事业运势" content={data.work} color="blue" />}
       {data.wealth && <FortuneSection title="财富运势" content={data.wealth} color="amber" />}
       {data.health && <FortuneSection title="健康运势" content={data.health} color="green" />}
 
-      {/* 幸运信息 */}
       <LuckyInfo items={[
         { label: '幸运数字', value: data.luckyNumber },
         { label: '幸运颜色', value: data.luckyColor },
@@ -264,7 +244,6 @@ function WeekFortune({ data }: { data: HoroscopeData['week'] }) {
         </div>
       )}
 
-      {/* 注意事项 */}
       {data.notice && (
         <div className="bg-amber-50/70 rounded-xl p-4 border border-amber-100/50 mt-3">
           <div className="text-[11px] text-amber-600/80 uppercase tracking-wider mb-1.5">本周提醒</div>
@@ -278,18 +257,15 @@ function WeekFortune({ data }: { data: HoroscopeData['week'] }) {
 function MonthFortune({ data }: { data: HoroscopeData['month'] }) {
   return (
     <div className="space-y-3">
-      {/* 概述 */}
       <div className="bg-white/70 rounded-xl p-4 border border-white/50">
         <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">本月概述</div>
         <p className="text-sm text-gray-700 leading-relaxed">{data.summary}</p>
       </div>
 
-      {/* 各项运势 */}
       {data.love && <FortuneSection title="爱情运势" content={data.love} color="pink" />}
       {data.work && <FortuneSection title="事业运势" content={data.work} color="blue" />}
       {data.wealth && <FortuneSection title="财富运势" content={data.wealth} color="amber" />}
 
-      {/* 优势与弱势 */}
       {(data.advantage || data.weakness) && (
         <div className="grid grid-cols-2 gap-3">
           {data.advantage && (
@@ -307,7 +283,6 @@ function MonthFortune({ data }: { data: HoroscopeData['month'] }) {
         </div>
       )}
 
-      {/* 星座关系 */}
       <div className="pt-4 border-t border-gray-200/40">
         <div className="flex flex-wrap gap-2">
           {data.fateStar && (
