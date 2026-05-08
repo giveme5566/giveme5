@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuckyDay - 今日运势预览</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #faf8f5 0%, #f5f0e8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a4a4a;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .preview-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .card-wrapper {
+            max-width: 375px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* 层叠效果 */
+        .card-shadow-1,
+        .card-shadow-2 {
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .card-shadow-1 {
+            transform: rotate(1deg);
+        }
+
+        .card-shadow-2 {
+            transform: rotate(-0.5deg);
+        }
+
+        /* 主卡片 */
+        .fortune-card {
+            position: relative;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid;
+        }
+
+        /* 普通日期样式 */
+        .card-normal {
+            background: #ffffff;
+            border-color: #f0f0f0;
+        }
+
+        .card-normal .day-number {
+            color: #4a4a4a;
+        }
+
+        .card-normal .date-info {
+            color: #9ca3af;
+        }
+
+        .card-normal .lunar-info {
+            color: #6b7280;
+        }
+
+        .card-normal .divider {
+            border-color: #f0f0f0;
+        }
+
+        .card-normal .label-yi,
+        .card-normal .label-ji {
+            color: #4a4a4a;
+        }
+
+        .card-normal .tag {
+            background: #f9fafb;
+            color: #6b7280;
+        }
+
+        .card-normal .footer-border {
+            border-color: #e5e7eb;
+        }
+
+        .card-normal .footer-text {
+            color: #6b7280;
+        }
+
+        .card-normal .save-btn {
+            background: #4a4a4a;
+        }
+
+        /* 节日样式（柔粉） */
+        .card-festival {
+            background: #fff5f7;
+            border-color: #fce4ec;
+        }
+
+        .card-festival .day-number {
+            color: #e891a8;
+        }
+
+        .card-festival .date-info {
+            color: #f4a4b4;
+        }
+
+        .card-festival .lunar-info {
+            color: #e891a8;
+        }
+
+        .card-festival .divider {
+            border-color: #fce4ec;
+        }
+
+        .card-festival .label-yi,
+        .card-festival .label-ji {
+            color: #db7a96;
+        }
+
+        .card-festival .tag {
+            background: #ffffff;
+            color: #e891a8;
+        }
+
+        .card-festival .footer-border {
+            border-color: #f8bbd9;
+        }
+
+        .card-festival .footer-text {
+            color: #f4a4b4;
+        }
+
+        .card-festival .save-btn {
+            background: #f4a4b4;
+        }
+
+        /* 节气样式（雾霾蓝） */
+        .card-solar {
+            background: #f0f4f8;
+            border-color: #e2e8f0;
+        }
+
+        .card-solar .day-number {
+            color: #7b9ebd;
+        }
+
+        .card-solar .date-info {
+            color: #94a3b8;
+        }
+
+        .card-solar .lunar-info {
+            color: #7b9ebd;
+        }
+
+        .card-solar .divider {
+            border-color: #e2e8f0;
+        }
+
+        .card-solar .label-yi,
+        .card-solar .label-ji {
+            color: #64748b;
+        }
+
+        .card-solar .tag {
+            background: #ffffff;
+            color: #7b9ebd;
+        }
+
+        .card-solar .footer-border {
+            border-color: #cbd5e1;
+        }
+
+        .card-solar .footer-text {
+            color: #7b9ebd;
+        }
+
+        .card-solar .save-btn {
+            background: #7b9ebd;
+        }
+
+        /* 通用样式 */
+        .date-section {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .day-number {
+            font-size: 60px;
+            font-weight: 300;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .date-info {
+            font-size: 14px;
+        }
+
+        .lunar-section {
+            text-align: center;
+            padding-bottom: 24px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid;
+        }
+
+        .lunar-info {
+            font-size: 14px;
+        }
+
+        .divider-dot {
+            margin: 0 4px;
+            opacity: 0.5;
+        }
+
+        .yi-ji-section {
+            margin-bottom: 24px;
+        }
+
+        .yi-row,
+        .ji-row {
+            margin-bottom: 16px;
+        }
+
+        .label-yi,
+        .label-ji {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .footer-section {
+            padding-top: 16px;
+            border-top: 1px solid;
+            text-align: center;
+        }
+
+        .footer-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .save-btn {
+            width: 100%;
+            margin-top: 16px;
+            padding: 12px;
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .nav-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(250, 248, 245, 0.95);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            margin: -20px -20px 20px -20px;
+        }
+
+        .back-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+
+        .back-btn::before {
+            content: "←";
+            font-size: 18px;
+            color: #4a4a4a;
+        }
+
+        .page-title {
+            flex: 1;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500;
+            color: #4a4a4a;
+            padding-right: 36px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍀 LuckyDay 今日运势 - 三种状态预览</h1>
+
+        <!-- 普通日期 -->
+        <div class="preview-section">
+            <div class="section-title">普通日期（无节日无节气）</div>
+            <div class="nav-header">
+                <div class="back-btn"></div>
+                <div class="page-title">今日运势</div>
+            </div>
+            <div class="card-wrapper">
+                <div class="card-shadow-1"></div>
+                <div class="card-shadow-2"></div>
+                <div class="fortune-card card-normal">
+                    <div class="date-section">
+                        <div class="day-number">8</div>
+                        <div class="date-info">2026.05 · 周五</div>
+                    </div>
+                    <div class="lunar-section divider">
+                        <span class="lunar-info">三月廿二</span>
+                        <span class="divider-dot">·</span>
+                        <span class="lunar-info">丙午年</span>
+                        <span class="divider-dot">·</span>
+                        <span class="lunar-info">马肖</span>
+                    </div>
+                    <div class="yi-ji-section">
+                        <div class="yi-row">
+                            <span class="label-yi">宜</span>
+                            <div class="tags">
+                                <span class="tag">祭祀</span>
+                                <span class="tag">祈福</span>
+                                <span class="tag">嫁娶</span>
+                                <span class="tag">出行</span>
+                                <span class="tag">纳财</span>
+                            </div>
+                        </div>
+                        <div class="ji-row">
+                            <span class="label-ji">忌</span>
+                            <div class="tags">
+                                <span class="tag">动土</span>
+                                <span class="tag">破土</span>
+                                <span class="tag">安葬</span>
+                                <span class="tag">开市</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="save-btn">保存图片</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 节日日期 -->
+        <div class="preview-section">
+            <div class="section-title">节日日期（春节 + 元宵节）- 柔粉主题</div>
+            <div class="nav-header">
+                <div class="back-btn"></div>
+                <div class="page-title">今日运势</div>
+            </div>
+            <div class="card-wrapper">
+                <div class="card-shadow-1"></div>
+                <div class="card-shadow-2"></div>
+                <div class="fortune-card card-festival">
+                    <div class="date-section">
+                        <div class="day-number">17</div>
+                        <div class="date-info">2026.02 · 周二</div>
+                    </div>
+                    <div class="lunar-section divider">
+                        <span class="lunar-info">正月初一</span>
+                        <span class="divider-dot">·</span>
+                        <span class="lunar-info">丙午年</span>
+                        <span class="divider-dot">·</span>
+                        <span class="lunar-info">马肖</span>
+                    </div>
+                    <div class="yi-ji-section">
+                        <div class="yi-row">
+                            <span class="label-yi">宜</span>
+                            <div class="tags">
+                                <span class="tag">祭祀</span>
+                                <span class="tag">祈福</span>
+                                <span class="tag">嫁娶</span>
+                                <span class="tag">出行</span>
+                                <span class="tag">纳财</span>
+                            </div>
+                        </div>
+                        <div class="ji-row">
+                            <span class="label-ji">忌</span>
+                            <div class="tags">
+                                <span class="tag">动土</span>
+                                <span class="tag">破土</span>
+                                <span class="tag">安葬</span>
+                                <span class="tag">开市</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="footer-section footer-border">
+                        <span class="footer-text">春节 元宵节</span>
+                    </div>
+                    <button class="save-btn">保存图片</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 节气日期 -->
+        <div class="preview-section">
+            <div class="section-title">节气日期（立夏）- 薄荷绿主题</div>
+            <div class="nav-header">
+                <div class="back-btn"></div>
+                <div class="page-title">今日运势</div>
+            </div>
+            <div class="card-wrapper">
+                <div class="card-shadow-1"></div>
+                <div class="card-shadow-2"></div>
+                <div class="fortune-card card-solar">
+                    <div class="date-section">
+                        <div class="day-number">5</div>
+                        <div class="date-info">2026.05 · 周二</div>
+                    </div>
+                    <div class="lunar-section divider">
+                        <span class="lunar-info">三月十九</span>
+                        <span class="divider-dot">·</span>
+                        <span class="lunar-info">丙午年</span>
+                        <span class="divider-dot">·</span>
+                        <span class="lunar-info">马肖</span>
+                    </div>
+                    <div class="yi-ji-section">
+                        <div class="yi-row">
+                            <span class="label-yi">宜</span>
+                            <div class="tags">
+                                <span class="tag">祭祀</span>
+                                <span class="tag">祈福</span>
+                                <span class="tag">嫁娶</span>
+                                <span class="tag">出行</span>
+                                <span class="tag">纳财</span>
+                            </div>
+                        </div>
+                        <div class="ji-row">
+                            <span class="label-ji">忌</span>
+                            <div class="tags">
+                                <span class="tag">动土</span>
+                                <span class="tag">破土</span>
+                                <span class="tag">安葬</span>
+                                <span class="tag">开市</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="footer-section footer-border">
+                        <span class="footer-text">今日立夏</span>
+                    </div>
+                    <button class="save-btn">保存图片</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

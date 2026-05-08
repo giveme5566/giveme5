@@ -69,6 +69,11 @@ export default function Fortune() {
   const ganZhiYear = lunarInfo.ganZhiYear
 
   const isHoliday = lunarInfo.节日.length > 0
+  const hasSolarTerm = !!lunarInfo.节气
+  
+  // 确定主题：节日 > 节气 > 普通
+  const theme = isHoliday ? 'festival' : hasSolarTerm ? 'solar' : 'normal'
+  
   const lunarMonth = lunarInfo.lunarDate.includes('年') ? lunarInfo.lunarDate.split('年')[1].split('月')[0] : '正'
   const lunarDay = lunarInfo.lunarDate.includes('月') ? lunarInfo.lunarDate.split('月')[1].replace('日', '') : '初一'
 
@@ -83,6 +88,51 @@ export default function Fortune() {
   const lunarMonthStr = toChineseMonth(toArabicNumber(lunarMonth))
   const lunarDayStr = toChineseDay(toArabicNumber(lunarDay))
 
+  // 主题样式配置
+  const themeStyles = {
+    festival: {
+      card: 'bg-rose-50 border-rose-100',
+      dayNumber: 'text-rose-500',
+      dateInfo: 'text-rose-500',
+      lunarText: 'text-rose-600',
+      divider: 'border-rose-100',
+      dot: 'text-rose-300',
+      label: 'text-rose-700',
+      tag: 'bg-white text-rose-600',
+      footerBorder: 'border-rose-200',
+      footerText: 'text-rose-500',
+      button: 'bg-rose-400 hover:bg-rose-500'
+    },
+    solar: {
+      card: 'bg-slate-50 border-slate-200',
+      dayNumber: 'text-slate-500',
+      dateInfo: 'text-slate-400',
+      lunarText: 'text-slate-500',
+      divider: 'border-slate-200',
+      dot: 'text-slate-300',
+      label: 'text-slate-600',
+      tag: 'bg-white text-slate-500',
+      footerBorder: 'border-slate-200',
+      footerText: 'text-slate-500',
+      button: 'bg-slate-400 hover:bg-slate-500'
+    },
+    normal: {
+      card: 'bg-white border-gray-50',
+      dayNumber: 'text-gray-800',
+      dateInfo: 'text-gray-400',
+      lunarText: 'text-gray-500',
+      divider: 'border-gray-100',
+      dot: 'text-gray-300',
+      label: 'text-gray-700',
+      tag: 'bg-gray-50 text-gray-600',
+      footerBorder: 'border-gray-200',
+      footerText: 'text-gray-500',
+      button: 'bg-gray-800 hover:bg-gray-700'
+    }
+  }
+
+  const style = themeStyles[theme]
+
   return (
     <PageWrapper title="今日运势">
       <div className="px-5 py-4">
@@ -93,45 +143,35 @@ export default function Fortune() {
             
             <div 
               ref={cardRef}
-              className={`relative rounded-3xl p-6 shadow-sm border ${
-                isHoliday ? 'bg-rose-50 border-rose-100' : 'bg-white border-gray-50'
-              }`}
+              className={`relative rounded-3xl p-6 shadow-sm border ${style.card}`}
             >
               <div className="text-center mb-6">
-                <div className="text-6xl font-light text-gray-800 mb-2">{day}</div>
-                <div className={`text-sm ${isHoliday ? 'text-rose-500' : 'text-gray-400'}`}>
+                <div className={`text-6xl font-light mb-2 ${style.dayNumber}`}>{day}</div>
+                <div className={`text-sm ${style.dateInfo}`}>
                   {year}.{String(month).padStart(2, '0')} · 周{weekday}
                 </div>
               </div>
 
-              <div className={`text-center mb-6 pb-6 border-b ${isHoliday ? 'border-rose-100' : 'border-gray-100'}`}>
-                <span className={`mr-2 ${isHoliday ? 'text-rose-600' : 'text-gray-500'}`}>
+              <div className={`text-center mb-6 pb-6 border-b ${style.divider}`}>
+                <span className={`mr-2 ${style.lunarText}`}>
                   {lunarMonthStr}{lunarDayStr}
                 </span>
-                <span className={`mx-1 ${isHoliday ? 'text-rose-300' : 'text-gray-300'}`}>·</span>
-                <span className={`mr-2 ${isHoliday ? 'text-rose-600' : 'text-gray-500'}`}>{ganZhiYear}</span>
-                <span className={`mx-1 ${isHoliday ? 'text-rose-300' : 'text-gray-300'}`}>·</span>
-                <span className={`mr-2 ${isHoliday ? 'text-rose-600' : 'text-gray-500'}`}>{lunarInfo.zodiac}肖</span>
-                {lunarInfo.节气 && (
-                  <>
-                    <span className={`mx-1 ${isHoliday ? 'text-rose-300' : 'text-gray-300'}`}>·</span>
-                    <span className={isHoliday ? 'text-rose-600' : ''}>{lunarInfo.节气}</span>
-                  </>
-                )}
+                <span className={`mx-1 ${style.dot}`}>·</span>
+                <span className={`mr-2 ${style.lunarText}`}>{ganZhiYear}</span>
+                <span className={`mx-1 ${style.dot}`}>·</span>
+                <span className={`mr-2 ${style.lunarText}`}>{lunarInfo.zodiac}肖</span>
               </div>
 
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm font-medium text-gray-700">宜</span>
+                    <span className={`text-sm font-medium ${style.label}`}>宜</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {lunarInfo.yi.map((item) => (
                       <span
                         key={item}
-                        className={`px-2.5 py-1 rounded-full text-xs ${
-                          isHoliday ? 'bg-white text-rose-600' : 'bg-gray-50 text-gray-600'
-                        }`}
+                        className={`px-2.5 py-1 rounded-full text-xs ${style.tag}`}
                       >
                         {item}
                       </span>
@@ -141,15 +181,13 @@ export default function Fortune() {
 
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm font-medium text-gray-700">忌</span>
+                    <span className={`text-sm font-medium ${style.label}`}>忌</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {lunarInfo.ji.map((item) => (
                       <span
                         key={item}
-                        className={`px-2.5 py-1 rounded-full text-xs ${
-                          isHoliday ? 'bg-white text-rose-600' : 'bg-gray-50 text-gray-600'
-                        }`}
+                        className={`px-2.5 py-1 rounded-full text-xs ${style.tag}`}
                       >
                         {item}
                       </span>
@@ -159,13 +197,23 @@ export default function Fortune() {
               </div>
 
               {lunarInfo.节日.length > 0 && (
-                <div className="mt-6 pt-4 border-t border-rose-200">
+                <div className={`mt-6 pt-4 border-t ${style.footerBorder}`}>
                   <div className="flex justify-center gap-2">
                     {lunarInfo.节日.map((festival) => (
-                      <span key={festival} className="text-sm text-rose-500 font-medium">
+                      <span key={festival} className={`text-sm font-medium ${style.footerText}`}>
                         {festival}
                       </span>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {lunarInfo.节气 && lunarInfo.节日.length === 0 && (
+                <div className={`mt-6 pt-4 border-t ${style.footerBorder}`}>
+                  <div className="flex justify-center">
+                    <span className={`text-sm ${style.footerText}`}>
+                      今日{lunarInfo.节气}
+                    </span>
                   </div>
                 </div>
               )}
@@ -175,7 +223,7 @@ export default function Fortune() {
           <button
             onClick={handleShare}
             disabled={isSharing}
-            className="w-full mt-4 py-3 bg-gray-800 text-white rounded-2xl text-sm font-medium hover:bg-gray-700 transition-colors disabled:opacity-50"
+            className={`w-full mt-4 py-3 text-white rounded-2xl text-sm font-medium transition-colors disabled:opacity-50 ${style.button}`}
           >
             {isSharing ? '生成中...' : '保存图片'}
           </button>

@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
 import Fortune from './pages/Fortune'
+import FortunePreview from './pages/FortunePreview'
 import Horoscope from './pages/Horoscope'
 import HolyCup from './pages/HolyCup'
 import FortuneStick from './pages/FortuneStick'
@@ -12,6 +13,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/fortune" element={<Fortune />} />
+      <Route path="/fortune-preview" element={<FortunePreview />} />
       <Route path="/horoscope" element={<Horoscope />} />
       <Route path="/holy-cup" element={<HolyCup />} />
       <Route path="/fortune-stick" element={<FortuneStick />} />
