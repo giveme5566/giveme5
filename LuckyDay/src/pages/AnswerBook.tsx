@@ -13,10 +13,10 @@ export default function AnswerBook() {
 
   const handleFlip = () => {
     if (isFlipping) return
-    
+
     setIsFlipping(true)
     setShowAnswer(false)
-    
+
     setTimeout(() => {
       const answer = getRandomAnswer()
       setCurrentAnswer(answer)
@@ -26,14 +26,9 @@ export default function AnswerBook() {
     }, 800)
   }
 
-  const handleNewQuestion = () => {
-    setCurrentAnswer(null)
-    setShowAnswer(false)
-  }
-
   const handleSaveImage = async () => {
     if (!bookRef.current || isSaving) return
-    
+
     setIsSaving(true)
     try {
       const canvas = await html2canvas(bookRef.current, {
@@ -42,7 +37,7 @@ export default function AnswerBook() {
         useCORS: true,
         allowTaint: true
       })
-      
+
       const link = document.createElement('a')
       link.download = `答案之书-${Date.now()}.png`
       link.href = canvas.toDataURL('image/png')
@@ -64,26 +59,26 @@ export default function AnswerBook() {
               答案之书
             </h2>
             <p className="text-sm text-gray-400 tracking-wide">
-              在心中默念你的问题，然后翻开书页
+              在心中默念你的问题，点击书页获取答案
             </p>
           </div>
 
           {/* 书本区域 */}
           <div ref={bookRef} className="relative mb-8 p-4 bg-gradient-to-b from-transparent via-transparent to-gray-50/30 rounded-3xl">
             {/* 书本容器 */}
-            <div 
+            <div
               className={`relative w-full aspect-[3/4] max-w-[280px] mx-auto cursor-pointer
                 transition-transform duration-700 ease-out transform-gpu
                 ${isFlipping ? 'scale-[0.98]' : 'hover:scale-[1.02]'}`}
-              onClick={!currentAnswer ? handleFlip : undefined}
+              onClick={handleFlip}
             >
               {/* 书本封面/页面 */}
-              <div 
+              <div
                 className={`absolute inset-0 rounded-r-2xl rounded-l-sm shadow-2xl
                   transition-all duration-700 ease-out transform-gpu origin-left
                   ${isFlipping ? 'rotate-y-180' : ''}
-                  ${showAnswer && currentAnswer 
-                    ? 'bg-amber-50' 
+                  ${showAnswer && currentAnswer
+                    ? 'bg-amber-50'
                     : 'bg-indigo-900'}`}
                 style={{
                   transformStyle: 'preserve-3d',
@@ -97,10 +92,10 @@ export default function AnswerBook() {
                     <div className="absolute inset-0 opacity-10">
                       <div className="h-full w-full bg-gradient-to-br from-white/20 to-transparent" />
                     </div>
-                    
+
                     {/* 封面标题 */}
                     <div className="relative text-center">
-                      <div className="w-16 h-16 mx-auto mb-6 rounded-full border-2 border-amber-400/60 
+                      <div className="w-16 h-16 mx-auto mb-6 rounded-full border-2 border-amber-400/60
                         flex items-center justify-center">
                         <span className="text-2xl text-amber-400/80">?</span>
                       </div>
@@ -123,7 +118,7 @@ export default function AnswerBook() {
 
                 {/* 答案内容 */}
                 {showAnswer && currentAnswer && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-8 
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-8
                     bg-gradient-to-br from-amber-50/95 to-amber-100/80">
                     {/* 答案文字 */}
                     <div className="text-center">
@@ -143,11 +138,11 @@ export default function AnswerBook() {
               </div>
 
               {/* 书脊效果 */}
-              <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r 
+              <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r
                 from-gray-800 via-gray-700 to-gray-600 rounded-l-sm" />
 
               {/* 翻页动画的背面 */}
-              <div 
+              <div
                 className={`absolute inset-0 rounded-r-2xl rounded-l-sm bg-amber-50
                   transition-all duration-700 ease-out transform-gpu origin-left
                   ${isFlipping ? '' : 'rotate-y-180'}`}
@@ -161,41 +156,19 @@ export default function AnswerBook() {
                 <div className="absolute inset-0 opacity-30">
                   <div className="h-full w-full bg-gradient-to-br from-amber-100/50 to-transparent" />
                 </div>
-                
+
                 {/* 翻页中的提示 */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-8 h-8 border-2 border-indigo-300/30 border-t-indigo-400 
+                  <div className="w-8 h-8 border-2 border-indigo-300/30 border-t-indigo-400
                     rounded-full animate-spin" />
                 </div>
               </div>
             </div>
 
             {/* 阴影效果 */}
-            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-3/4 h-4 
+            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-3/4 h-4
               bg-gradient-to-t from-gray-200/50 to-transparent rounded-full blur-md" />
           </div>
-
-          {/* 操作按钮 */}
-          {currentAnswer && (
-            <div className="flex gap-3 mb-8">
-              <button
-                onClick={handleFlip}
-                disabled={isFlipping}
-                className="flex-1 py-3 rounded-xl bg-indigo-500 text-white text-sm font-medium
-                  hover:bg-indigo-600 active:scale-[0.98] transition-all duration-300
-                  disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                再翻一次
-              </button>
-              <button
-                onClick={handleNewQuestion}
-                className="flex-1 py-3 rounded-xl bg-white border border-gray-200 text-gray-700 text-sm font-medium
-                  hover:bg-gray-50 active:scale-[0.98] transition-all duration-300"
-              >
-                新问题
-              </button>
-            </div>
-          )}
 
           {/* 保存图片按钮 */}
           {currentAnswer && (
@@ -215,7 +188,7 @@ export default function AnswerBook() {
                 ) : (
                   <>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                         d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     保存图片
@@ -233,7 +206,7 @@ export default function AnswerBook() {
               </h4>
               <div className="space-y-2">
                 {history.map((answer, index) => (
-                  <div 
+                  <div
                     key={`${answer.id}-${index}`}
                     className="p-3 rounded-xl text-sm bg-amber-50 border border-amber-100"
                   >
