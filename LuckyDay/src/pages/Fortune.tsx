@@ -19,8 +19,7 @@ function toChineseDay(day: number): string {
 
 export default function Fortune() {
   const [lunarInfo, setLunarInfo] = useState<LunarInfo | null>(null)
-  // 临时设置为2026年5月21日（小满节气）用于预览
-  const [currentDate] = useState(new Date(2026, 4, 21))
+  const [currentDate] = useState(new Date())
   const [isSharing, setIsSharing] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
