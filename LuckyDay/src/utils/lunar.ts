@@ -75,11 +75,14 @@ async function getLunar(date: Date) {
   try {
     const lunisolar = (await import('lunisolar')).default
     const l = lunisolar(date)
+    // solarTerm 可能是对象，需要转换为字符串
+    const solarTermValue = l.solarTerm
+    const solarTermStr = solarTermValue ? String(solarTermValue) : null
     return {
       year: l.lunar.year,
       month: l.lunar.month,
       day: l.lunar.day,
-      solarTerm: l.solarTerm || null
+      solarTerm: solarTermStr
     }
   } catch (e) {
     return {
