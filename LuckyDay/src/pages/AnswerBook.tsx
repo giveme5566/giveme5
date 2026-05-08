@@ -1,13 +1,15 @@
 import { useState, useRef } from 'react'
 import PageWrapper from '../components/PageWrapper'
-import { getRandomAnswer, getAnswerTypeLabel, getAnswerTypeColor, type Answer } from '../data/answers'
+import { getRandomAnswer, type Answer } from '../data/answers'
+import html2canvas from 'html2canvas'
 
 export default function AnswerBook() {
-  const [question, setQuestion] = useState('')
   const [currentAnswer, setCurrentAnswer] = useState<Answer | null>(null)
   const [isFlipping, setIsFlipping] = useState(false)
   const [showAnswer, setShowAnswer] = useState(false)
   const [history, setHistory] = useState<Answer[]>([])
+  const [isSaving, setIsSaving] = useState(false)
+  const bookRef = useRef<HTMLDivElement>(null)
 
   const handleFlip = () => {
     if (isFlipping) return
@@ -15,7 +17,6 @@ export default function AnswerBook() {
     setIsFlipping(true)
     setShowAnswer(false)
     
-    // 翻书动画持续时间
     setTimeout(() => {
       const answer = getRandomAnswer()
       setCurrentAnswer(answer)
@@ -26,9 +27,31 @@ export default function AnswerBook() {
   }
 
   const handleNewQuestion = () => {
-    setQuestion('')
     setCurrentAnswer(null)
     setShowAnswer(false)
+  }
+
+  const handleSaveImage = async () => {
+    if (!bookRef.current || isSaving) return
+    
+    setIsSaving(true)
+    try {
+      const canvas = await html2canvas(bookRef.current, {
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      })
+      
+      const link = document.createElement('a')
+      link.download = `答案之书-${Date.now()}.png`
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+    } catch (error) {
+      console.error('Save image error:', error)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -45,23 +68,8 @@ export default function AnswerBook() {
             </p>
           </div>
 
-          {/* 问题输入 */}
-          {!currentAnswer && (
-            <div className="mb-8">
-              <textarea
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                placeholder="在这里写下你的问题..."
-                className="w-full h-24 p-4 rounded-2xl border border-gray-200 bg-white/80 
-                  text-sm text-gray-700 placeholder-gray-400
-                  focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300
-                  resize-none transition-all duration-300"
-              />
-            </div>
-          )}
-
           {/* 书本区域 */}
-          <div className="relative mb-8">
+          <div ref={bookRef} className="relative mb-8 p-4 bg-gradient-to-b from-transparent via-transparent to-gray-50/30 rounded-3xl">
             {/* 书本容器 */}
             <div 
               className={`relative w-full aspect-[3/4] max-w-[280px] mx-auto cursor-pointer
@@ -75,7 +83,7 @@ export default function AnswerBook() {
                   transition-all duration-700 ease-out transform-gpu origin-left
                   ${isFlipping ? 'rotate-y-180' : ''}
                   ${showAnswer && currentAnswer 
-                    ? getAnswerTypeColor(currentAnswer.type).split(' ')[1] 
+                    ? 'bg-amber-50' 
                     : 'bg-indigo-900'}`}
                 style={{
                   transformStyle: 'preserve-3d',
@@ -116,13 +124,7 @@ export default function AnswerBook() {
                 {/* 答案内容 */}
                 {showAnswer && currentAnswer && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-8 
-                    bg-gradient-to-br from-white/90 to-white/70">
-                    {/* 类型标签 */}
-                    <div className={`mb-6 px-3 py-1 rounded-full text-[10px] uppercase tracking-wider
-                      ${getAnswerTypeColor(currentAnswer.type)}`}>
-                      {getAnswerTypeLabel(currentAnswer.type)}
-                    </div>
-
+                    bg-gradient-to-br from-amber-50/95 to-amber-100/80">
                     {/* 答案文字 */}
                     <div className="text-center">
                       <p className="text-lg text-gray-800 leading-relaxed font-light tracking-wide">
@@ -195,6 +197,34 @@ export default function AnswerBook() {
             </div>
           )}
 
+          {/* 保存图片按钮 */}
+          {currentAnswer && (
+            <div className="mb-8">
+              <button
+                onClick={handleSaveImage}
+                disabled={isSaving}
+                className="w-full py-3 rounded-xl bg-rose-500 text-white text-sm font-medium
+                  hover:bg-rose-600 active:scale-[0.98] transition-all duration-300
+                  disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSaving ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    保存中...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    保存图片
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+
           {/* 历史记录 */}
           {history.length > 0 && (
             <div className="border-t border-gray-100 pt-6">
@@ -205,15 +235,8 @@ export default function AnswerBook() {
                 {history.map((answer, index) => (
                   <div 
                     key={`${answer.id}-${index}`}
-                    className={`p-3 rounded-xl text-sm ${getAnswerTypeColor(answer.type).split(' ')[1]} 
-                      border ${getAnswerTypeColor(answer.type).split(' ')[2]}`}
+                    className="p-3 rounded-xl text-sm bg-amber-50 border border-amber-100"
                   >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-[10px] uppercase tracking-wider
-                        ${getAnswerTypeColor(answer.type).split(' ')[0]}`}>
-                        {getAnswerTypeLabel(answer.type)}
-                      </span>
-                    </div>
                     <p className="text-gray-700">{answer.text}</p>
                   </div>
                 ))}
