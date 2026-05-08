@@ -290,30 +290,39 @@ export const answers: Answer[] = [
   { id: 273, text: "小心你的直觉，它可能错了", type: 'cautionary' }
 ]
 
-// 历史记录（用于避免连续同类型）
+// 历史记录（用于控制连续同类型次数）
 let recentTypes: Answer['type'][] = []
-const MAX_RECENT_TYPES = 3 // 记录最近3次类型，避免重复
+const MAX_SAME_TYPE_COUNT = 3 // 同类型最多连续出现3次
 
-// 获取随机答案（避免连续同类型）
+// 获取随机答案（控制连续同类型次数）
 export function getRandomAnswer(): Answer {
-  // 获取可选类型（排除最近出现的类型）
-  const availableTypes = (['warm', 'playful', 'philosophical', 'cautionary'] as const)
-    .filter(type => !recentTypes.includes(type))
+  // 检查最近是否已经连续3次同类型
+  const lastType = recentTypes.length > 0 ? recentTypes[recentTypes.length - 1] : null
+  const sameTypeCount = lastType 
+    ? recentTypes.filter(t => t === lastType).length 
+    : 0
   
-  // 如果所有类型都被排除了（初始状态或特殊情况），重置历史
-  const typesToUse = availableTypes.length > 0 ? availableTypes : ['warm', 'playful', 'philosophical', 'cautionary'] as const
+  let selectedType: Answer['type']
   
-  // 随机选择一个类型
-  const selectedType = typesToUse[Math.floor(Math.random() * typesToUse.length)]
+  if (lastType && sameTypeCount >= MAX_SAME_TYPE_COUNT) {
+    // 已经连续3次同类型，第4次必须换类型
+    const otherTypes = (['warm', 'playful', 'philosophical', 'cautionary'] as const)
+      .filter(type => type !== lastType)
+    selectedType = otherTypes[Math.floor(Math.random() * otherTypes.length)]
+  } else {
+    // 允许继续同类型或换类型，完全随机
+    const allTypes = ['warm', 'playful', 'philosophical', 'cautionary'] as const
+    selectedType = allTypes[Math.floor(Math.random() * allTypes.length)]
+  }
   
-  // 从该类型中随机选择一条答案
+  // 从选定的类型中随机选择一条答案
   const typeAnswers = answers.filter(a => a.type === selectedType)
   const randomAnswer = typeAnswers[Math.floor(Math.random() * typeAnswers.length)]
   
-  // 更新历史记录
+  // 更新历史记录（只保留最近3次，用于判断连续次数）
   recentTypes.push(selectedType)
-  if (recentTypes.length > MAX_RECENT_TYPES) {
-    recentTypes.shift() // 移除最旧的记录
+  if (recentTypes.length > MAX_SAME_TYPE_COUNT) {
+    recentTypes.shift()
   }
   
   return randomAnswer
