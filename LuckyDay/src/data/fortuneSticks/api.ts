@@ -55,8 +55,8 @@ function parseApiResponse(type: StickType, apiData: Record<string, unknown>): Fo
     case 'zhuge':
       return {
         xuhao: String(apiData.res1 || ''),
-        qianming: String(apiData.res2 || '').split('|')[1] || String(apiData.res1 || ''),
-        qianwen: String(apiData.res2 || '').split('|')[0] || '',
+        qianming: String(apiData.res2 || '').split('|')[0] || String(apiData.res1 || ''),
+        qianwen: String(apiData.res2 || '').split('|')[1] || '',
         jieyue: String(apiData.res3 || '').replace(/\|/g, ''),
         xianji: '',
         diangu: '',
