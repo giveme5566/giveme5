@@ -1,3 +1,5 @@
+import huangdaxianData from './huangdaxian.json'
+
 export interface FortuneStick {
   xuhao: string
   qianming: string
@@ -15,7 +17,7 @@ export interface Scene {
 }
 
 export interface StickOption {
-  type: 'guanyin' | 'guandi' | 'yuelao' | 'zhuge'
+  type: 'guanyin' | 'guandi' | 'yuelao' | 'zhuge' | 'huangdaxian'
   name: string
   desc: string
 }
@@ -25,6 +27,7 @@ export const fortuneSticks: Record<string, FortuneStick[]> = {
   guandi: [],
   yuelao: [],
   zhuge: [],
+  huangdaxian: (huangdaxianData.sticks as FortuneStick[]) || [],
 }
 
 export const scenes: Scene[] = [
@@ -52,7 +55,7 @@ export const scenes: Scene[] = [
     name: '财运·生意',
     desc: '为财运、生意、投资等财务相关',
     sticks: [
-      { type: 'guandi', name: '关帝灵签', desc: '武财神信仰，专问财运、生意、投资等财务相关。' },
+      { type: 'guandi', name: '关帝灵签', desc: '武财神信仰，专问财运、生意，投资等财务相关。' },
       { type: 'guanyin', name: '观音灵签', desc: '普度众生，也可询问财运起伏与求财时机。' },
     ],
   },
@@ -81,6 +84,7 @@ export const scenes: Scene[] = [
     desc: '为家宅安宁、全家平安顺遂',
     sticks: [
       { type: 'guanyin', name: '观音灵签', desc: '保佑家宅安宁、全家平安顺遂。' },
+      { type: 'huangdaxian', name: '黄大仙灵签', desc: '黄大仙以治病驱邪著称，也可保佑家宅平安。' },
     ],
   },
   {
@@ -89,6 +93,7 @@ export const scenes: Scene[] = [
     desc: '为旅行、出差、搬家等',
     sticks: [
       { type: 'guanyin', name: '观音灵签', desc: '护佑路途平安，适合询问旅行、出差、搬家等。' },
+      { type: 'huangdaxian', name: '黄大仙灵签', desc: '黄大仙有求必应，出行前求签保平安。' },
     ],
   },
   {
@@ -98,6 +103,7 @@ export const scenes: Scene[] = [
     sticks: [
       { type: 'zhuge', name: '诸葛神签', desc: '智谋深远，384签，为人生岔路、决策犹豫提供启发。' },
       { type: 'guanyin', name: '观音灵签', desc: '慈悲开示，也能在迷茫时给予心灵慰藉。' },
+      { type: 'huangdaxian', name: '黄大仙灵签', desc: '黄大仙灵签以准确著称，为迷茫者指点迷津。' },
     ],
   },
   {
@@ -125,15 +131,25 @@ export const scenes: Scene[] = [
       { type: 'guanyin', name: '观音灵签', desc: '普度众生，也适用于日常随喜、求个心安。' },
       { type: 'guandi', name: '关帝灵签', desc: '武财神信仰，问事广泛，灵验度高。' },
       { type: 'zhuge', name: '诸葛神签', desc: '智谋深邃，384签，启迪智慧。' },
+      { type: 'huangdaxian', name: '黄大仙灵签', desc: '黄大仙灵签100签，有求必应。' },
     ],
   },
 ]
 
 export async function fetchFortuneStick(
-  type: 'guanyin' | 'guandi' | 'yuelao' | 'zhuge',
+  type: 'guanyin' | 'guandi' | 'yuelao' | 'zhuge' | 'huangdaxian',
   id: string = '10016472',
   key: string = 'd1f7bef7893ec5dfc39e86d5879a19a0'
 ): Promise<FortuneStick | null> {
+  if (type === 'huangdaxian') {
+    const sticks = fortuneSticks.huangdaxian
+    if (sticks && sticks.length > 0) {
+      const randomIndex = Math.floor(Math.random() * sticks.length)
+      return sticks[randomIndex]
+    }
+    throw new Error('黄大仙签文数据未加载')
+  }
+
   try {
     let randomNumber: number
     let url: string
@@ -213,6 +229,7 @@ export const stickTypeNames: Record<string, string> = {
   guandi: '关帝灵签',
   yuelao: '月老灵签',
   zhuge: '诸葛神签',
+  huangdaxian: '黄大仙灵签',
 }
 
 export const stickCounts: Record<string, number> = {
@@ -220,4 +237,5 @@ export const stickCounts: Record<string, number> = {
   guandi: 100,
   yuelao: 100,
   zhuge: 384,
+  huangdaxian: 100,
 }
