@@ -3,25 +3,10 @@ import PageWrapper from '../components/PageWrapper'
 import {
   scenes,
   fetchFortuneStick,
-  stickTypeNames,
 } from '../data/fortuneSticks'
 import type { FortuneStick, Scene, StickOption } from '../data/fortuneSticks'
 
 type Step = 'scene' | 'stick' | 'result'
-
-const sceneIcons: Record<string, string> = {
-  love: '💕',
-  career: '💼',
-  wealth: '💰',
-  study: '📚',
-  health: '💊',
-  home: '🏠',
-  travel: '✈️',
-  confused: '🌫️',
-  lawsuit: '⚖️',
-  child: '👶',
-  random: '✨',
-}
 
 export default function FortuneStickPage() {
   const [step, setStep] = useState<Step>('scene')
@@ -93,7 +78,7 @@ export default function FortuneStickPage() {
 
   const formatPoem = (poem: string) => {
     if (!poem) return []
-    return poem.split('|').filter(Boolean).map(line => line.trim())
+    return poem.split('|').filter(Boolean).map(line => line.trim().replace(/[|]/g, ''))
   }
 
   return (
@@ -115,11 +100,11 @@ export default function FortuneStickPage() {
                 <button
                   key={scene.id}
                   onClick={() => handleSelectScene(scene)}
-                  className="group relative bg-white/80 backdrop-blur-sm rounded-2xl p-5 shadow-sm border border-amber-100 hover:shadow-lg hover:border-amber-200 transition-all duration-300 hover:-translate-y-1 active:scale-95 overflow-hidden"
+                  className="group relative bg-white/80 backdrop-blur-sm rounded-2xl p-5 shadow-sm border border-amber-100 hover:shadow-lg hover:border-amber-200 transition-all duration-300 hover:-translate-y-1 active:scale-95"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-amber-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
                   <div className="relative">
-                    <div className="text-3xl mb-3">{sceneIcons[scene.id] || '🔮'}</div>
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 mb-3" />
                     <div className="font-medium text-gray-800 mb-1 text-base">
                       {scene.name}
                     </div>
@@ -150,14 +135,8 @@ export default function FortuneStickPage() {
                   onClick={() => handleSelectStick(stick)}
                   className="w-full group bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-amber-100 hover:shadow-lg hover:border-amber-200 transition-all duration-300 text-left active:scale-[0.98]"
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center text-2xl shadow-sm group-hover:scale-105 transition-transform">
-                      {stick.type === 'guanyin' && '🪷'}
-                      {stick.type === 'guandi' && '⚔️'}
-                      {stick.type === 'yuelao' && '🌹'}
-                      {stick.type === 'zhuge' && '📜'}
-                      {stick.type === 'huangdaxian' && '🧧'}
-                    </div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 shadow-sm group-hover:scale-105 transition-transform" />
                     <div className="flex-1">
                       <div className="font-medium text-gray-800 text-lg mb-1">
                         {stick.name}
@@ -180,12 +159,9 @@ export default function FortuneStickPage() {
 
         {isLoading && (
           <div className="flex flex-col items-center justify-center min-h-[60vh]">
-            <div className="relative w-20 h-20 mb-6">
+            <div className="relative w-16 h-16 mb-6">
               <div className="absolute inset-0 border-4 border-amber-200 rounded-full" />
               <div className="absolute inset-0 border-4 border-transparent border-t-amber-500 rounded-full animate-spin" />
-              <div className="absolute inset-2 flex items-center justify-center">
-                <span className="text-2xl">🍀</span>
-              </div>
             </div>
             <p className="text-gray-500 text-sm mb-1">诚心祈求中...</p>
             <p className="text-xs text-gray-400">请稍候</p>
@@ -194,7 +170,6 @@ export default function FortuneStickPage() {
 
         {error && (
           <div className="flex flex-col items-center justify-center min-h-[60vh] px-5">
-            <div className="text-5xl mb-4">😔</div>
             <p className="text-gray-600 mb-1 text-center">{error}</p>
             <button
               onClick={() => setError(null)}
@@ -206,102 +181,99 @@ export default function FortuneStickPage() {
         )}
 
         {step === 'result' && currentStick && selectedStick && (
-          <div ref={resultRef} className="px-5 py-8">
-            <div className="text-center mb-6">
+          <div ref={resultRef} className="px-5 py-6">
+            <div className="text-center mb-4">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-100 to-orange-100 rounded-full shadow-sm">
-                <span className="text-lg">
-                  {selectedStick.type === 'guanyin' && '🪷'}
-                  {selectedStick.type === 'guandi' && '⚔️'}
-                  {selectedStick.type === 'yuelao' && '🌹'}
-                  {selectedStick.type === 'zhuge' && '📜'}
-                  {selectedStick.type === 'huangdaxian' && '🧧'}
-                </span>
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
                 <span className="text-amber-700 font-medium">{selectedStick.name}</span>
               </div>
             </div>
 
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-b from-amber-200/50 to-orange-200/50 blur-xl rounded-3xl" />
-              <div className="relative bg-gradient-to-b from-amber-50 via-orange-50/50 to-amber-100/50 rounded-3xl p-6 shadow-xl border border-amber-200/50">
-                <div className="text-center mb-6">
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-400 text-white font-bold text-lg mb-3 shadow-lg">
-                    {currentStick.xuhao.replace(/[^0-9]/g, '')}
-                  </div>
-                  <div className="text-2xl font-serif text-gray-800 mb-1">
-                    {currentStick.qianming}
-                  </div>
-                  <div className="text-xs text-amber-600 tracking-widest">第 {currentStick.xuhao}</div>
-                </div>
-
-                <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-5 mb-4 shadow-inner border border-amber-100/50">
-                  <div className="text-center mb-4">
-                    <span className="inline-block px-3 py-1 bg-amber-100 rounded-full text-xs text-amber-700 font-medium tracking-wider">
-                      签 诗
-                    </span>
-                  </div>
-                  <div className="space-y-3">
-                    {formatPoem(currentStick.qianwen).map((line, idx) => (
-                      <div key={idx} className="text-center">
-                        <span className="text-gray-600 text-lg leading-relaxed">
-                          {line}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {currentStick.jieyue && (
-                  <div className="bg-gradient-to-r from-amber-100/60 to-orange-100/60 backdrop-blur-sm rounded-2xl p-5 mb-4 border border-amber-200/40">
-                    <div className="text-center mb-3">
-                      <span className="inline-block px-3 py-1 bg-white/60 rounded-full text-xs text-gray-600 font-medium tracking-wider">
-                        解 曰
-                      </span>
+              <div className="absolute -inset-4 bg-gradient-to-b from-amber-200/30 to-orange-200/30 blur-xl rounded-3xl" />
+              <div className="relative bg-gradient-to-b from-amber-50 via-orange-50/30 to-amber-100/50 rounded-3xl shadow-xl border border-amber-200/50 overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-2 bg-gradient-to-b from-amber-300 via-orange-300 to-amber-300" />
+                <div className="absolute right-0 top-0 bottom-0 w-2 bg-gradient-to-b from-amber-300 via-orange-300 to-amber-300" />
+                
+                <div className="px-8 py-8">
+                  <div className="text-center mb-8 pt-2">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-400 text-white font-bold text-2xl shadow-lg mb-4 ring-4 ring-amber-100">
+                      {currentStick.xuhao.replace(/[^0-9]/g, '')}
                     </div>
-                    <p className="text-gray-700 text-sm leading-relaxed text-center">
-                      {currentStick.jieyue}
-                    </p>
-                  </div>
-                )}
-
-                {currentStick.xianji && (
-                  <div className="bg-gradient-to-r from-orange-100/60 to-amber-100/60 backdrop-blur-sm rounded-2xl p-5 border border-orange-200/40">
-                    <div className="text-center mb-3">
-                      <span className="inline-block px-3 py-1 bg-white/60 rounded-full text-xs text-orange-700 font-medium tracking-wider">
-                        仙 机
-                      </span>
+                    <div className="text-3xl font-serif text-gray-800 mb-3">
+                      {currentStick.qianming}
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      {currentStick.xianji.split(/[。；]/).filter(Boolean).slice(0, 8).map((item, idx) => (
-                        <div key={idx} className="text-gray-600 bg-white/40 rounded-lg px-2 py-1 text-center">
-                          {item.trim()}
+                    <div className="flex items-center justify-center gap-4">
+                      <div className="h-px w-16 bg-gradient-to-r from-transparent to-amber-400" />
+                      <span className="text-sm text-amber-600 tracking-[0.3em]">第 {currentStick.xuhao} 签</span>
+                      <div className="h-px w-16 bg-gradient-to-l from-transparent to-amber-400" />
+                    </div>
+                  </div>
+
+                  <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 mb-5 shadow-inner border border-amber-100/50">
+                    <div className="flex items-center justify-center mb-6">
+                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+                      <span className="px-5 text-sm text-amber-600 tracking-[0.25em] font-medium">签 诗</span>
+                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+                    </div>
+                    <div className="space-y-4">
+                      {formatPoem(currentStick.qianwen).map((line, idx) => (
+                        <div key={idx} className="flex items-center justify-center">
+                          <div className="w-8 h-px bg-amber-300 mr-3" />
+                          <span className="text-gray-700 text-lg tracking-wide font-light">
+                            {line}
+                          </span>
+                          <div className="w-8 h-px bg-amber-300 ml-3" />
                         </div>
                       ))}
                     </div>
                   </div>
-                )}
+
+                  {currentStick.jieyue && (
+                    <div className="bg-gradient-to-r from-amber-100/80 to-orange-100/80 backdrop-blur-sm rounded-2xl p-5 mb-5 border border-amber-200/40">
+                      <div className="flex items-center justify-center mb-4">
+                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent" />
+                        <span className="px-5 text-sm text-gray-500 tracking-[0.25em] font-medium">解 曰</span>
+                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-orange-400 to-transparent" />
+                      </div>
+                      <p className="text-gray-700 text-sm leading-relaxed text-center">
+                        {currentStick.jieyue}
+                      </p>
+                    </div>
+                  )}
+
+                  {currentStick.xianji && (
+                    <div className="bg-gradient-to-r from-orange-100/60 to-amber-100/60 backdrop-blur-sm rounded-2xl p-5 border border-orange-200/40">
+                      <div className="flex items-center justify-center mb-4">
+                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+                        <span className="px-5 text-sm text-orange-600 tracking-[0.25em] font-medium">仙 机</span>
+                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        {currentStick.xianji.split(/[。；]/).filter(Boolean).slice(0, 8).map((item, idx) => (
+                          <div key={idx} className="text-gray-600 bg-white/60 rounded-xl px-4 py-3 text-sm text-center shadow-sm">
+                            {item.trim()}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-4 mt-6">
               <button
                 onClick={handleReset}
                 className="flex-1 py-4 bg-white/70 backdrop-blur-sm text-gray-600 font-medium rounded-2xl shadow-sm border border-gray-200 hover:bg-white hover:shadow-md transition-all active:scale-[0.98]"
               >
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12a9 9 0 019-9m0 0l6-6m-6 6l-6 6" />
-                  </svg>
-                  换场景
-                </span>
+                换场景
               </button>
               <button
                 onClick={() => selectedStick && handleSelectStick(selectedStick)}
                 className="flex-1 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium rounded-2xl shadow-lg hover:from-amber-600 hover:to-orange-600 transition-all active:scale-[0.98]"
               >
-                <span className="flex items-center justify-center gap-2">
-                  <span>🔄</span>
-                  再求一签
-                </span>
+                再求一签
               </button>
             </div>
           </div>
