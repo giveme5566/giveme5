@@ -3,7 +3,6 @@ import PageWrapper from '../components/PageWrapper'
 import {
   scenes,
   fetchFortuneStick,
-  stickCounts,
 } from '../data/fortuneSticks'
 import type { FortuneStick } from '../data/fortuneSticks'
 
@@ -132,13 +131,8 @@ export default function FortuneStickPage() {
                   onClick={() => handleSelectStick(stick.type, stick.name)}
                   className="w-full bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 active:scale-95 text-left"
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-gray-800">
-                      {stick.name}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {stickCounts[stick.type] || 100}支
-                    </span>
+                  <div className="font-medium text-gray-800 mb-2">
+                    {stick.name}
                   </div>
                   <p className="text-sm text-gray-500 leading-relaxed">
                     {stick.desc}
