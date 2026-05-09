@@ -3,7 +3,6 @@ import PageWrapper from '../components/PageWrapper'
 import {
   scenes,
   fetchFortuneStick,
-  stickTypeNames,
   stickCounts,
 } from '../data/fortuneSticks'
 import type { FortuneStick } from '../data/fortuneSticks'
@@ -39,13 +38,17 @@ export default function FortuneStickPage() {
     setIsLoading(true)
     setError(null)
 
-    const stick = await fetchFortuneStick(type as any)
-    if (stick) {
-      setSelectedStick({ type, name })
-      setCurrentStick(stick)
-      setStep('result')
-    } else {
-      setError('获取签文失败，请重试')
+    try {
+      const stick = await fetchFortuneStick(type as any)
+      if (stick) {
+        setSelectedStick({ type, name })
+        setCurrentStick(stick)
+        setStep('result')
+      } else {
+        setError('获取签文失败，请重试')
+      }
+    } catch (err) {
+      setError('获取签文失败，请检查网络后重试')
     }
 
     setIsLoading(false)
@@ -134,7 +137,7 @@ export default function FortuneStickPage() {
                       {stick.name}
                     </span>
                     <span className="text-xs text-gray-400">
-                      {stickCounts[stick.type]}支
+                      {stickCounts[stick.type] || 100}支
                     </span>
                   </div>
                   <p className="text-sm text-gray-500 leading-relaxed">
@@ -147,13 +150,22 @@ export default function FortuneStickPage() {
         )}
 
         {isLoading && (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full" />
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="animate-spin w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full mb-3" />
+            <p className="text-gray-500 text-sm">请稍候...</p>
           </div>
         )}
 
         {error && (
-          <div className="text-center text-red-500 py-8">{error}</div>
+          <div className="text-center py-8">
+            <p className="text-red-500 mb-4">{error}</p>
+            <button
+              onClick={() => setError(null)}
+              className="px-6 py-2 bg-gray-100 text-gray-600 rounded-full text-sm"
+            >
+              返回
+            </button>
+          </div>
         )}
 
         {step === 'result' && currentStick && selectedStick && (
@@ -190,12 +202,14 @@ export default function FortuneStickPage() {
                 </p>
               </div>
 
-              <div className="bg-white/60 rounded-xl p-4">
-                <div className="text-xs text-gray-500 mb-2 text-center">仙机</div>
-                <p className="text-gray-700 text-center whitespace-pre-line">
-                  {currentStick.xianji}
-                </p>
-              </div>
+              {currentStick.xianji && (
+                <div className="bg-white/60 rounded-xl p-4">
+                  <div className="text-xs text-gray-500 mb-2 text-center">仙机</div>
+                  <p className="text-gray-700 text-center whitespace-pre-line">
+                    {currentStick.xianji}
+                  </p>
+                </div>
+              )}
             </div>
 
             {currentStick.diangu && (

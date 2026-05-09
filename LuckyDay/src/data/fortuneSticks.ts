@@ -162,28 +162,30 @@ export async function fetchFortuneStick(
     const response = await fetch(url)
     const data = await response.json()
 
-    if (data.code === 200 && data.data) {
+    if (data.code === 200) {
+      const apiData = data.data || data
       const stick: FortuneStick = {
-        xuhao: data.data.xuhao,
-        qianming: data.data.qianming,
-        qianwen: data.data.qianwen,
-        jieyue: data.data.jieyue,
-        xianji: data.data.xianji,
-        diangu: data.data.diangu,
+        xuhao: apiData.xuhao,
+        qianming: apiData.qianming,
+        qianwen: apiData.qianwen,
+        jieyue: apiData.jieyue || apiData.qianyu || '',
+        xianji: apiData.xianji || '',
+        diangu: apiData.diangu || '',
       }
 
-      const existing = fortuneSticks[type].find(s => s.xuhao === stick.xuhao)
-      if (!existing) {
-        fortuneSticks[type].push(stick)
+      if (stick.xuhao && stick.qianming) {
+        const existing = fortuneSticks[type].find(s => s.xuhao === stick.xuhao)
+        if (!existing) {
+          fortuneSticks[type].push(stick)
+        }
+        return stick
       }
-
-      return stick
     }
 
     throw new Error(data.message || '获取签文失败')
   } catch (error) {
     console.error(`获取${type}签失败:`, error)
-    return null
+    throw error
   }
 }
 
