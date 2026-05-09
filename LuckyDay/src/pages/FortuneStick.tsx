@@ -262,7 +262,7 @@ export default function FortuneStickPage() {
                         解 曰
                       </span>
                     </div>
-                    <p className="text-gray-700 text-sm leading-relaxed text-center">
+                    <p className="text-gray-700 text-sm leading-relaxed">
                       {currentStick.jieyue}
                     </p>
                   </div>
@@ -275,9 +275,9 @@ export default function FortuneStickPage() {
                         仙 机
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      {currentStick.xianji.split(/[。；]/).filter(Boolean).slice(0, 8).map((item, idx) => (
-                        <div key={idx} className="text-gray-600 bg-white/40 rounded-lg px-2 py-1 text-center">
+                    <div className="space-y-2">
+                      {currentStick.xianji.split(/[。；]/).filter(Boolean).map((item, idx) => (
+                        <div key={idx} className="text-sm text-gray-600 leading-relaxed">
                           {item.trim()}
                         </div>
                       ))}
