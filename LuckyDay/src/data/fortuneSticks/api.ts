@@ -29,10 +29,10 @@ function parseApiResponse(type: StickType, apiData: Record<string, unknown>): Fo
       return {
         xuhao: String(apiData.xuhao || apiData.res1 || ''),
         qianming: String(apiData.qianming || '').split('。')[0],
-        qianwen: String(apiData.qianwen || apiData.res3 || ''),
-        jieyue: String(apiData.jieyue || apiData.qianyu || ''),
-        xianji: String(apiData.xianji || ''),
-        diangu: String(apiData.diangu || ''),
+        qianwen: String(apiData.qianwen || apiData.res3 || '').replace(/\|/g, ''),
+        jieyue: String(apiData.jieyue || apiData.qianyu || '').replace(/\|/g, ''),
+        xianji: String(apiData.xianji || '').replace(/\|/g, ''),
+        diangu: String(apiData.diangu || '').replace(/\|/g, ''),
       }
     case 'guandi':
       return {
@@ -40,15 +40,15 @@ function parseApiResponse(type: StickType, apiData: Record<string, unknown>): Fo
         qianming: String(apiData.res2 || '').replace(/第.*签\s*/, '').replace(/\s*[\u4e00-\u9fa5]+签$/, ''),
         qianwen: String(apiData.res3 || '').replace(/\|/g, '\n'),
         jieyue: String(apiData.res6 || apiData.res4 || ''),
-        xianji: String(apiData.res5 || ''),
+        xianji: String(apiData.res5 || '').replace(/\|/g, ''),
         diangu: '',
       }
     case 'yuelao':
       return {
         xuhao: String(apiData.res1 || ''),
         qianming: String(apiData.res2 || '').replace(/月老灵签/, '').split(' ')[0],
-        qianwen: String(apiData.res3 || ''),
-        jieyue: String(apiData.res4 || ''),
+        qianwen: String(apiData.res3 || '').replace(/\|/g, ''),
+        jieyue: String(apiData.res4 || '').replace(/\|/g, ''),
         xianji: '',
         diangu: '',
       }
@@ -57,7 +57,7 @@ function parseApiResponse(type: StickType, apiData: Record<string, unknown>): Fo
         xuhao: String(apiData.res1 || ''),
         qianming: String(apiData.res2 || '').split('|')[1] || String(apiData.res1 || ''),
         qianwen: String(apiData.res2 || '').split('|')[0] || '',
-        jieyue: String(apiData.res3 || ''),
+        jieyue: String(apiData.res3 || '').replace(/\|/g, ''),
         xianji: '',
         diangu: '',
       }
