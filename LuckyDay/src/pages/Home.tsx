@@ -4,10 +4,8 @@ import PageWrapper from '../components/PageWrapper'
 const modules = [
   { path: '/fortune', title: '今日运势', desc: '黄历宜忌，好运每一天' },
   { path: '/horoscope', title: '星座物语', desc: '十二星座今日指引' },
-  { path: '/holy-cup', title: '掷圣杯', desc: '一掷即答，心想事成' },
   { path: '/fortune-stick', title: '求支签', desc: '观音灵签，答疑解惑' },
   { path: '/answer-book', title: '答案之书', desc: '翻开答案，找到方向' },
-  { path: '/tarot', title: '塔罗占卜', desc: '78张牌的智慧指引' },
 ]
 
 export default function Home() {
