@@ -9,11 +9,11 @@ import {
 import { ArrowLeft } from 'lucide-react'
 
 const stickTypes = [
-  { type: 'guanyin', name: '观音灵签', desc: '答疑解惑' },
-  { type: 'guandi', name: '关帝灵签', desc: '事业财运' },
-  { type: 'yuelao', name: '月老灵签', desc: '姻缘感情' },
-  { type: 'zhuge', name: '诸葛神签', desc: '趋吉避凶' },
-  { type: 'huangdaxian', name: '黄大仙签', desc: '福禄寿喜' },
+  { type: 'guanyin', name: '观音灵签', desc: '答疑解惑', count: 100 },
+  { type: 'guandi', name: '关帝灵签', desc: '事业财运', count: 100 },
+  { type: 'yuelao', name: '月老灵签', desc: '姻缘感情', count: 100 },
+  { type: 'zhuge', name: '诸葛神签', desc: '趋吉避凶', count: 384 },
+  { type: 'huangdaxian', name: '黄大仙签', desc: '福禄寿喜', count: 100 },
 ]
 
 export default function FortuneStickPage() {
@@ -112,6 +112,7 @@ export default function FortuneStickPage() {
                 <div className="text-xl mb-2">{item.type === 'yuelao' ? '🌙' : item.type === 'guanyin' ? '🙏' : item.type === 'guandi' ? '⚔️' : item.type === 'zhuge' ? '📜' : '✨'}</div>
                 <div className="font-medium text-gray-800">{item.name}</div>
                 <div className="text-xs text-gray-400 mt-1">{item.desc}</div>
+                <div className="text-xs text-gray-300 mt-1">{item.count}支签</div>
               </button>
             ))}
           </div>

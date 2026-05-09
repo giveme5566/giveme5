@@ -21,8 +21,17 @@ export async function fetchFortuneStick(
   key: string = 'd1f7bef7893ec5dfc39e86d5879a19a0'
 ): Promise<FortuneStick | null> {
   try {
-    const randomNumber = Math.floor(Math.random() * 100) + 1
-    const url = `https://cn.apihz.cn/api/mingli/${type}.php?id=${id}&key=${key}&number=${randomNumber}`
+    let randomNumber: number
+    let url: string
+
+    if (type === 'zhuge') {
+      randomNumber = Math.floor(Math.random() * 384) + 1
+      url = `https://cn.apihz.cn/api/mingli/zhuge.php?id=${id}&key=${key}&number=${randomNumber}`
+    } else {
+      randomNumber = Math.floor(Math.random() * 100) + 1
+      url = `https://cn.apihz.cn/api/mingli/${type}.php?id=${id}&key=${key}&number=${randomNumber}`
+    }
+
     const response = await fetch(url)
     const data = await response.json()
 
@@ -72,4 +81,12 @@ export const stickTypeDescs: Record<string, string> = {
   yuelao: '月下老人姻缘灵签',
   zhuge: '诸葛亮诸葛神签',
   huangdaxian: '黄大仙祠灵签',
+}
+
+export const stickCounts: Record<string, number> = {
+  guanyin: 100,
+  guandi: 100,
+  yuelao: 100,
+  zhuge: 384,
+  huangdaxian: 100,
 }
