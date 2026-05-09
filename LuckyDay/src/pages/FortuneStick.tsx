@@ -3,10 +3,10 @@ import PageWrapper from '../components/PageWrapper'
 import {
   scenes,
   fetchFortuneStick,
-  FortuneStick,
   stickTypeNames,
   stickCounts,
 } from '../data/fortuneSticks'
+import type { FortuneStick } from '../data/fortuneSticks'
 
 type Step = 'scene' | 'stick' | 'result'
 
