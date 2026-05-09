@@ -49,7 +49,7 @@ function extractPoem(qianwen) {
       if (poemLines.length === 4) break;
     }
     
-    poem = poemLines.slice(0, 4).join('|');
+    poem = poemLines.slice(0, 4).join('。');
   } else if (cleaned.includes('、')) {
     const idx = cleaned.indexOf('。');
     if (idx > 0) {
@@ -68,7 +68,7 @@ function extractPoem(qianwen) {
       poem = cleaned.substring(0, idx).trim();
     } else {
       const sentences = cleaned.split('。').filter(s => s.trim().length > 0);
-      poem = sentences.slice(0, 4).join('|');
+      poem = sentences.slice(0, 4).join('。');
     }
   }
   
