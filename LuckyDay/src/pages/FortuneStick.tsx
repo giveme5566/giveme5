@@ -229,13 +229,9 @@ export default function FortuneStickPage() {
               <div className="absolute inset-0 bg-gradient-to-b from-amber-200/50 to-orange-200/50 blur-xl rounded-3xl" />
               <div className="relative bg-gradient-to-b from-amber-50 via-orange-50/50 to-amber-100/50 rounded-3xl p-6 shadow-xl border border-amber-200/50">
                 <div className="text-center mb-6">
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-400 text-white font-bold text-lg mb-3 shadow-lg">
-                    {currentStick.xuhao.replace(/[^0-9]/g, '')}
-                  </div>
-                  <div className="text-2xl font-serif text-gray-800 mb-1">
+                  <div className="text-2xl font-serif text-gray-800">
                     {currentStick.qianming}
                   </div>
-                  <div className="text-xs text-amber-600 tracking-widest">{currentStick.xuhao}</div>
                 </div>
 
                 <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-5 mb-4 shadow-inner border border-amber-100/50">
