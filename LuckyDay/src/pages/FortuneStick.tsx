@@ -78,7 +78,15 @@ export default function FortuneStickPage() {
 
   const formatPoem = (poem: string) => {
     if (!poem) return []
-    return poem.split(/[。]/).filter(Boolean).map(line => line.trim())
+    const lines = poem.split(/[。]/).filter(Boolean).map(line => line.trim())
+    
+    const isHuangdaxian = selectedStick?.type === 'huangdaxian'
+    
+    if (isHuangdaxian && lines.length > 4) {
+      return lines.slice(0, 4)
+    }
+    
+    return lines
   }
 
   return (
@@ -243,7 +251,7 @@ export default function FortuneStickPage() {
                   <div className="space-y-3">
                     {formatPoem(currentStick.qianwen).map((line, idx) => (
                       <div key={idx} className="text-center">
-                        <span className="text-gray-600 text-lg leading-relaxed">
+                        <span className="text-gray-700 text-base tracking-widest leading-loose font-serif">
                           {line}
                         </span>
                       </div>
