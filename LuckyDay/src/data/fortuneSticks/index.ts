@@ -1,33 +1,33 @@
-import huangdaxianData from './huangdaxian.json'
+import { fetchFromApi } from './api'
+import { getRandomLocalStick } from './local'
+import type { FortuneStick, Scene, StickOption, StickType, FetchMode, StickConfig } from './types'
+export * from './types'
 
-export interface FortuneStick {
-  xuhao: string
-  qianming: string
-  qianwen: string
-  jieyue: string
-  xianji: string
-  diangu: string
+const fetchModes: Record<StickType, FetchMode> = {
+  guanyin: 'api',
+  guandi: 'api',
+  yuelao: 'api',
+  zhuge: 'api',
+  huangdaxian: 'local',
 }
 
-export interface Scene {
-  id: string
-  name: string
-  desc: string
-  sticks: StickOption[]
+export function getFetchMode(type: StickType): FetchMode {
+  return fetchModes[type]
 }
 
-export interface StickOption {
-  type: 'guanyin' | 'guandi' | 'yuelao' | 'zhuge' | 'huangdaxian'
-  name: string
-  desc: string
-}
-
-export const fortuneSticks: Record<string, FortuneStick[]> = {
-  guanyin: [],
-  guandi: [],
-  yuelao: [],
-  zhuge: [],
-  huangdaxian: (huangdaxianData.sticks as FortuneStick[]) || [],
+export async function fetchFortuneStick(type: StickType): Promise<FortuneStick | null> {
+  const mode = fetchModes[type]
+  
+  if (mode === 'local') {
+    return getRandomLocalStick(type)
+  }
+  
+  try {
+    return await fetchFromApi(type)
+  } catch (error) {
+    console.error(`API 获取 ${type} 签失败，尝试本地数据:`, error)
+    return getRandomLocalStick(type)
+  }
 }
 
 export const scenes: Scene[] = [
@@ -53,7 +53,7 @@ export const scenes: Scene[] = [
   {
     id: 'wealth',
     name: '财运·生意',
-    desc: '为财运、生意、投资等财务相关',
+    desc: '为财运、生意，投资等财务相关',
     sticks: [
       { type: 'guandi', name: '关帝灵签', desc: '武财神信仰，专问财运、生意，投资等财务相关。' },
       { type: 'guanyin', name: '观音灵签', desc: '普度众生，也可询问财运起伏与求财时机。' },
@@ -135,107 +135,3 @@ export const scenes: Scene[] = [
     ],
   },
 ]
-
-export async function fetchFortuneStick(
-  type: 'guanyin' | 'guandi' | 'yuelao' | 'zhuge' | 'huangdaxian',
-  id: string = '10016472',
-  key: string = 'd1f7bef7893ec5dfc39e86d5879a19a0'
-): Promise<FortuneStick | null> {
-  if (type === 'huangdaxian') {
-    const sticks = fortuneSticks.huangdaxian
-    if (sticks && sticks.length > 0) {
-      const randomIndex = Math.floor(Math.random() * sticks.length)
-      return sticks[randomIndex]
-    }
-    throw new Error('黄大仙签文数据未加载')
-  }
-
-  try {
-    let randomNumber: number
-    let url: string
-
-    if (type === 'zhuge') {
-      randomNumber = Math.floor(Math.random() * 100) + 1
-      url = `https://cn.apihz.cn/api/mingli/zhuge.php?id=${id}&key=${key}&number=${randomNumber}`
-    } else {
-      randomNumber = Math.floor(Math.random() * 100) + 1
-      url = `https://cn.apihz.cn/api/mingli/${type}.php?id=${id}&key=${key}&number=${randomNumber}`
-    }
-
-    const response = await fetch(url)
-    const data = await response.json()
-
-    if (data.code === 200) {
-      let stick: FortuneStick
-
-      if (type === 'guanyin') {
-        const apiData = data.data || data
-        stick = {
-          xuhao: apiData.xuhao || apiData.res1 || '',
-          qianming: apiData.qianming || apiData.res2?.split('。')[0] || '',
-          qianwen: apiData.qianwen || apiData.res3 || '',
-          jieyue: apiData.jieyue || apiData.qianyu || '',
-          xianji: apiData.xianji || '',
-          diangu: apiData.diangu || '',
-        }
-      } else if (type === 'guandi') {
-        const apiData = data.data || data
-        stick = {
-          xuhao: apiData.res1 || '',
-          qianming: apiData.res2?.replace(/第.*签\s*/, '').replace(/\s*[\u4e00-\u9fa5]+签$/, '') || '',
-          qianwen: apiData.res3?.replace(/\|/g, '\n') || '',
-          jieyue: apiData.res6 || apiData.res4 || '',
-          xianji: apiData.res5 || '',
-          diangu: '',
-        }
-      } else if (type === 'yuelao') {
-        const apiData = data.data || data
-        stick = {
-          xuhao: apiData.res1 || '',
-          qianming: apiData.res2?.replace(/月老灵签/, '').split(' ')[0] || '',
-          qianwen: apiData.res3 || '',
-          jieyue: apiData.res4 || '',
-          xianji: '',
-          diangu: '',
-        }
-      } else if (type === 'zhuge') {
-        const apiData = data.data || data
-        stick = {
-          xuhao: apiData.res1 || '',
-          qianming: apiData.res2?.split('|')[1] || apiData.res1 || '',
-          qianwen: apiData.res2?.split('|')[0] || '',
-          jieyue: apiData.res3 || '',
-          xianji: '',
-          diangu: '',
-        }
-      } else {
-        throw new Error('未知签文类型')
-      }
-
-      if (stick.xuhao && stick.qianwen) {
-        return stick
-      }
-    }
-
-    throw new Error(data.msg || '获取签文失败')
-  } catch (error) {
-    console.error(`获取${type}签失败:`, error)
-    throw error
-  }
-}
-
-export const stickTypeNames: Record<string, string> = {
-  guanyin: '观音灵签',
-  guandi: '关帝灵签',
-  yuelao: '月老灵签',
-  zhuge: '诸葛神签',
-  huangdaxian: '黄大仙灵签',
-}
-
-export const stickCounts: Record<string, number> = {
-  guanyin: 100,
-  guandi: 100,
-  yuelao: 100,
-  zhuge: 384,
-  huangdaxian: 100,
-}
