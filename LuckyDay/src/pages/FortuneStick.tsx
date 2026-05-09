@@ -235,7 +235,7 @@ export default function FortuneStickPage() {
                   <div className="text-2xl font-serif text-gray-800 mb-1">
                     {currentStick.qianming}
                   </div>
-                  <div className="text-xs text-amber-600 tracking-widest">第 {currentStick.xuhao}</div>
+                  <div className="text-xs text-amber-600 tracking-widest">{currentStick.xuhao}</div>
                 </div>
 
                 <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-5 mb-4 shadow-inner border border-amber-100/50">
