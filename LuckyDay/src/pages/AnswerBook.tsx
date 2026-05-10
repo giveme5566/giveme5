@@ -6,45 +6,43 @@ import html2canvas from 'html2canvas'
 const PAGE_COUNT = 5
 
 export default function AnswerBook() {
-  const [currentPage, setCurrentPage] = useState(0)
+  const [currentPage, setCurrentPage] = useState(-1)
   const [pages, setPages] = useState<(Answer | null)[]>(() =>
     Array(PAGE_COUNT).fill(null).map(() => getRandomAnswer())
   )
-  const [isFlipping, setIsFlipping] = useState(false)
   const [history, setHistory] = useState<Answer[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const bookRef = useRef<HTMLDivElement>(null)
+  const [flippingPage, setFlippingPage] = useState(-1)
 
   const handleFlip = () => {
-    if (isFlipping || currentPage >= PAGE_COUNT - 1) return
+    const nextPage = currentPage + 1
+    if (nextPage >= PAGE_COUNT) return
 
-    setIsFlipping(true)
-    setTimeout(() => {
+    if (currentPage >= 0) {
       const prevAnswer = pages[currentPage]
       if (prevAnswer) {
         setHistory(h => [prevAnswer, ...h].slice(0, 10))
       }
-      setCurrentPage(prev => prev + 1)
-      setIsFlipping(false)
+    }
+
+    setFlippingPage(nextPage)
+
+    setTimeout(() => {
+      setCurrentPage(nextPage)
+      setFlippingPage(-1)
     }, 800)
   }
 
   const handleReset = () => {
-    setCurrentPage(0)
+    setCurrentPage(-1)
     setPages(Array(PAGE_COUNT).fill(null).map(() => getRandomAnswer()))
     setHistory([])
   }
 
   const handleNewAnswer = () => {
-    if (isFlipping || currentPage >= PAGE_COUNT - 1) return
-
-    setIsFlipping(true)
     const newAnswer = getRandomAnswer()
     setPages(prev => prev.map((p, i) => i === currentPage ? newAnswer : p))
-
-    setTimeout(() => {
-      setIsFlipping(false)
-    }, 800)
   }
 
   const handleSaveImage = async () => {
@@ -89,7 +87,7 @@ export default function AnswerBook() {
               style={{ width: '300px', height: '400px' }}
             >
               <div
-                className="absolute inset-0 rounded-lg overflow-hidden"
+                className="book-base absolute inset-0 rounded-lg overflow-hidden"
                 style={{
                   background: 'linear-gradient(180deg, #d4a574 0%, #c49a6c 10%, #f5e6c8 10.5%, #f5e6c8 100%)',
                   boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
@@ -105,14 +103,20 @@ export default function AnswerBook() {
 
               {pages.map((page, index) => {
                 const isFlipped = index < currentPage
+                const isFlipping = index === flippingPage
 
                 return (
                   <div
                     key={index}
-                    className={`leaf ${isFlipping && index === currentPage ? 'flipping' : ''}`}
+                    className={`leaf ${isFlipping ? 'flipping' : ''}`}
                     style={{
-                      transform: isFlipped ? 'rotateY(-180deg)' : 'rotateY(0)',
+                      transform: isFlipped ? 'rotateY(-180deg)' : 'rotateY(0deg)',
                       zIndex: pages.length - index
+                    }}
+                    onAnimationEnd={() => {
+                      if (isFlipping) {
+                        setFlippingPage(-1)
+                      }
                     }}
                   >
                     <div
@@ -180,7 +184,7 @@ export default function AnswerBook() {
           </div>
 
           <div className="flex gap-3 mb-8">
-            {currentPage > 0 && (
+            {currentPage >= 0 && (
               <button
                 onClick={handleReset}
                 className="flex-1 py-3 rounded-xl bg-white border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 active:scale-[0.98] transition-all"
@@ -188,7 +192,7 @@ export default function AnswerBook() {
                 重新开始
               </button>
             )}
-            {currentPage > 0 && (
+            {currentPage >= 0 && (
               <button
                 onClick={handleSaveImage}
                 disabled={isSaving}
@@ -209,13 +213,13 @@ export default function AnswerBook() {
                 )}
               </button>
             )}
-            {currentPage < PAGE_COUNT && (
+            {currentPage < PAGE_COUNT - 1 && (
               <button
                 onClick={handleFlip}
-                disabled={isFlipping}
+                disabled={flippingPage >= 0}
                 className="flex-1 py-3 rounded-xl bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 active:scale-[0.98] transition-all disabled:opacity-50"
               >
-                {isFlipping ? '翻页中...' : (currentPage === 0 ? '翻开' : '再翻一页')}
+                {flippingPage >= 0 ? '翻页中...' : (currentPage === -1 ? '翻开' : '再翻一页')}
               </button>
             )}
           </div>
@@ -244,7 +248,11 @@ export default function AnswerBook() {
         .flipbook {
           position: relative;
           transform-style: preserve-3d;
-          perspective: 1000px;
+          perspective: 1200px;
+        }
+
+        .book-base {
+          transform: translateZ(-1px);
         }
 
         .leaf {
@@ -252,12 +260,12 @@ export default function AnswerBook() {
           width: 100%;
           height: 100%;
           transform-style: preserve-3d;
-          transition: transform 0.8s ease-in-out;
           transform-origin: left center;
+          transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
         }
 
         .leaf.flipping {
-          transition: none;
+          transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
         }
 
         .page {
@@ -270,13 +278,12 @@ export default function AnswerBook() {
         }
 
         .page.front {
-          transform: rotateY(0deg);
-          box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+          box-shadow: 2px 0 15px rgba(0,0,0,0.15);
         }
 
         .page.back {
           transform: rotateY(180deg);
-          box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+          box-shadow: -2px 0 15px rgba(0,0,0,0.15);
         }
       `}</style>
     </PageWrapper>
