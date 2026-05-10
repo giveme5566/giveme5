@@ -3,72 +3,37 @@ import PageWrapper from '../components/PageWrapper'
 import { getRandomAnswer, type Answer } from '../data/answers'
 import html2canvas from 'html2canvas'
 
-interface PageState {
-  id: number
-  answer: Answer
-  isFlipping: boolean
-  flipProgress: number
-}
+const PAGE_COUNT = 5
 
 export default function AnswerBook() {
-  const [pages, setPages] = useState<PageState[]>([])
-  const [currentAnswer, setCurrentAnswer] = useState<Answer | null>(null)
+  const [currentPage, setCurrentPage] = useState(0)
+  const [pages, setPages] = useState<(Answer | null)[]>(() =>
+    Array(PAGE_COUNT).fill(null).map(() => getRandomAnswer())
+  )
   const [isFlipping, setIsFlipping] = useState(false)
   const [history, setHistory] = useState<Answer[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const bookRef = useRef<HTMLDivElement>(null)
-  const animationRef = useRef<number | null>(null)
 
   const handleFlip = () => {
-    if (isFlipping) return
+    if (isFlipping || currentPage >= PAGE_COUNT - 1) return
 
-    const answer = getRandomAnswer()
-    setCurrentAnswer(answer)
-    setHistory(prev => [answer, ...prev].slice(0, 10))
-
-    const newPage: PageState = {
-      id: Date.now(),
-      answer,
-      isFlipping: true,
-      flipProgress: 0
-    }
-
-    setPages(prev => [...prev, newPage])
     setIsFlipping(true)
-
-    const startTime = Date.now()
-    const duration = 800
-
-    const animate = () => {
-      const elapsed = Date.now() - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      const eased = 1 - Math.pow(1 - progress, 4)
-
-      setPages(prev => prev.map((p, i) =>
-        i === prev.length - 1 ? { ...p, flipProgress: eased } : p
-      ))
-
-      if (progress < 1) {
-        animationRef.current = requestAnimationFrame(animate)
-      } else {
-        setPages(prev => prev.map(p =>
-          p.id === newPage.id ? { ...p, isFlipping: false } : p
-        ))
-        setIsFlipping(false)
-      }
-    }
-
-    animate()
+    setTimeout(() => {
+      setCurrentPage(prev => prev + 1)
+      setIsFlipping(false)
+    }, 800)
   }
 
   const handleReset = () => {
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current)
-    }
-    setPages([])
-    setCurrentAnswer(null)
+    setCurrentPage(0)
+    setPages(Array(PAGE_COUNT).fill(null).map(() => getRandomAnswer()))
     setHistory([])
-    setIsFlipping(false)
+  }
+
+  const handleNewAnswer = (index: number) => {
+    const newAnswer = getRandomAnswer()
+    setPages(prev => prev.map((p, i) => i === index ? newAnswer : p))
   }
 
   const handleSaveImage = async () => {
@@ -95,23 +60,13 @@ export default function AnswerBook() {
   }
 
   useEffect(() => {
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current)
+    if (currentPage > 0) {
+      const prevAnswer = pages[currentPage - 1]
+      if (prevAnswer) {
+        setHistory(h => [prevAnswer, ...h].slice(0, 10))
       }
     }
-  }, [])
-
-  const getFlipStyle = (progress: number) => {
-    const rotation = progress * 180
-    const shadowIntensity = Math.sin(progress * Math.PI) * 30
-    const perspectiveAdjust = progress < 0.5 ? 100 * (1 - progress) : -100 * (progress - 0.5)
-
-    return {
-      transform: `rotateY(${rotation}deg) translateX(${perspectiveAdjust}px)`,
-      boxShadow: `0 ${shadowIntensity}px ${shadowIntensity * 2}px rgba(0,0,0,0.3)`
-    }
-  }
+  }, [currentPage, pages])
 
   return (
     <PageWrapper title="答案之书">
@@ -128,124 +83,94 @@ export default function AnswerBook() {
 
           <div ref={bookRef} className="relative mb-8 pt-4">
             <div
-              className="relative mx-auto"
-              style={{
-                perspective: '1500px',
-                width: '320px',
-                height: '420px'
-              }}
+              className="flipbook mx-auto"
+              style={{ width: '300px', height: '400px' }}
             >
-              <div className="absolute inset-0 rounded-lg overflow-hidden" style={{
-                background: 'linear-gradient(180deg, #d4a574 0%, #c49a6c 10%, #f5e6c8 10.5%, #f5e6c8 100%)',
-                boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
-              }}>
-                <div className="absolute top-0 left-0 w-4 h-full bg-gradient-to-r from-gray-600 via-gray-500 to-gray-400 rounded-l-lg" />
+              <div
+                className="absolute inset-0 rounded-lg overflow-hidden"
+                style={{
+                  background: 'linear-gradient(180deg, #d4a574 0%, #c49a6c 10%, #f5e6c8 10.5%, #f5e6c8 100%)',
+                  boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
+                }}
+              >
+                <div
+                  className="absolute top-0 left-0 w-4 h-full"
+                  style={{
+                    background: 'linear-gradient(90deg, #8b7355 0%, #a08060 50%, #c4a882 100%)'
+                  }}
+                />
               </div>
 
-              {pages.map((page, index) => (
-                <div
-                  key={page.id}
-                  className="absolute top-0 right-0 w-full h-full"
-                  style={{
-                    ...getFlipStyle(page.flipProgress),
-                    transformOrigin: 'left center',
-                    transformStyle: 'preserve-3d',
-                    transition: page.isFlipping ? 'none' : 'transform 0.3s ease',
-                    zIndex: pages.length - index
-                  }}
-                >
-                  <div className="leaf" style={{ position: 'relative', width: '100%', height: '100%', transformStyle: 'preserve-3d' }}>
-                    <div className="leaf" style={{ position: 'absolute', inset: 0, transformStyle: 'preserve-3d' }}>
-                      <div
-                        className="page front"
-                        style={{
-                          position: 'absolute',
-                          inset: 0,
-                          backfaceVisibility: 'hidden',
-                          transform: 'rotateY(180deg)',
-                          background: 'linear-gradient(180deg, #1a365d 0%, #0f2744 100%)',
-                          borderRadius: '0 8px 8px 0'
-                        }}
-                      >
-                        <div className="w-full h-full flex flex-col items-center justify-center p-6">
-                          <div className="absolute inset-0 opacity-10">
-                            <div className="h-full w-full bg-gradient-to-br from-amber-200/20 to-transparent" />
-                          </div>
-                          <div className="text-center relative z-10">
-                            <div className="w-14 h-14 mx-auto mb-4 rounded-full border border-amber-400/50 flex items-center justify-center">
-                              <span className="text-xl text-amber-400/80">?</span>
-                            </div>
-                            <h3 className="text-xl font-light text-amber-100/90 tracking-widest">
-                              答案之书
-                            </h3>
-                          </div>
+              {pages.map((page, index) => {
+                const isFlipped = index < currentPage
+                const isCurrent = index === currentPage
+                const showFront = !isFlipped
+
+                return (
+                  <div
+                    key={index}
+                    className={`leaf ${isCurrent && isFlipping ? 'flipping' : ''}`}
+                    style={{
+                      transform: isFlipped ? 'rotateY(-180deg)' : 'rotateY(0)',
+                    }}
+                  >
+                    <div
+                      className="page front"
+                      style={{
+                        transform: 'rotateY(0deg)',
+                        background: 'linear-gradient(180deg, #fef9e7 0%, #f5e6c8 100%)',
+                        display: showFront ? 'flex' : 'none'
+                      }}
+                    >
+                      <div className="w-full h-full flex flex-col items-center justify-center p-6">
+                        <p className="text-base text-gray-700 leading-relaxed font-light tracking-wide text-center px-4">
+                          {page?.text}
+                        </p>
+                        <div className="absolute bottom-4 right-6 flex items-center gap-2">
+                          <span className="text-xs text-gray-400/60">{page?.id}</span>
+                          <button
+                            onClick={() => handleNewAnswer(index)}
+                            className="text-xs text-amber-500 hover:text-amber-600"
+                          >
+                            换答案
+                          </button>
                         </div>
                       </div>
+                    </div>
 
-                      <div
-                        className="page back"
-                        style={{
-                          position: 'absolute',
-                          inset: 0,
-                          backfaceVisibility: 'hidden',
-                          background: 'linear-gradient(180deg, #fef9e7 0%, #f5e6c8 100%)',
-                          borderRadius: '0 8px 8px 0',
-                          boxShadow: '2px 0 10px rgba(0,0,0,0.1)'
-                        }}
-                      >
-                        <div className="w-full h-full flex flex-col items-center justify-center p-6">
-                          <p className="text-base text-gray-700 leading-relaxed font-light tracking-wide text-center px-4">
-                            {page.answer.text}
-                          </p>
-                          <div className="absolute bottom-4 right-6">
-                            <span className="text-xs text-gray-400/60">{page.answer.id}</span>
+                    <div
+                      className="page back"
+                      style={{
+                        transform: 'rotateY(180deg)',
+                        background: 'linear-gradient(180deg, #1a365d 0%, #0f2744 100%)'
+                      }}
+                    >
+                      <div className="w-full h-full flex flex-col items-center justify-center p-6">
+                        <div className="absolute inset-0 opacity-10">
+                          <div className="h-full w-full bg-gradient-to-br from-amber-200/20 to-transparent" />
+                        </div>
+                        <div className="text-center relative z-10">
+                          <div className="w-14 h-14 mx-auto mb-4 rounded-full border border-amber-400/50 flex items-center justify-center">
+                            <span className="text-xl text-amber-400/80">?</span>
                           </div>
+                          <h3 className="text-xl font-light text-amber-100/90 tracking-widest">
+                            答案之书
+                          </h3>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-
-              {!pages.length && (
-                <div
-                  className="absolute inset-0 rounded-lg cursor-pointer"
-                  style={{
-                    background: 'linear-gradient(180deg, #1a365d 0%, #0f2744 100%)',
-                    boxShadow: '0 10px 40px rgba(0,0,0,0.3)'
-                  }}
-                  onClick={handleFlip}
-                >
-                  <div className="w-full h-full flex flex-col items-center justify-center p-6">
-                    <div className="absolute inset-0 opacity-10">
-                      <div className="h-full w-full bg-gradient-to-br from-amber-200/20 to-transparent" />
-                    </div>
-                    <div className="text-center relative z-10">
-                      <div className="w-16 h-16 mx-auto mb-6 rounded-full border-2 border-amber-400/50 flex items-center justify-center">
-                        <span className="text-2xl text-amber-400/80">?</span>
-                      </div>
-                      <h3 className="text-2xl font-light text-amber-100/90 tracking-widest mb-2">
-                        答案之书
-                      </h3>
-                      <p className="text-xs text-amber-200/50 tracking-wider uppercase">
-                        The Book of Answers
-                      </p>
-                    </div>
-                    <div className="absolute bottom-6 left-0 right-0 text-center">
-                      <span className="text-xs text-amber-200/40 tracking-wide">
-                        点击翻开
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
+                )
+              })}
             </div>
 
-            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-2/3 h-6 bg-gradient-to-t from-gray-400/30 to-transparent rounded-full blur-md" />
+            <div
+              className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-2/3 h-6 bg-gradient-to-t from-gray-400/30 to-transparent rounded-full blur-md"
+            />
           </div>
 
           <div className="flex gap-3 mb-8">
-            {pages.length > 0 && (
+            {currentPage > 0 && (
               <button
                 onClick={handleReset}
                 className="flex-1 py-3 rounded-xl bg-white border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 active:scale-[0.98] transition-all"
@@ -253,7 +178,7 @@ export default function AnswerBook() {
                 重新开始
               </button>
             )}
-            {currentAnswer && (
+            {currentPage > 0 && (
               <button
                 onClick={handleSaveImage}
                 disabled={isSaving}
@@ -274,13 +199,15 @@ export default function AnswerBook() {
                 )}
               </button>
             )}
-            <button
-              onClick={handleFlip}
-              disabled={isFlipping}
-              className="flex-1 py-3 rounded-xl bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 active:scale-[0.98] transition-all disabled:opacity-50"
-            >
-              {isFlipping ? '翻页中...' : (pages.length ? '再翻一页' : '翻开')}
-            </button>
+            {currentPage < PAGE_COUNT - 1 && (
+              <button
+                onClick={handleFlip}
+                disabled={isFlipping}
+                className="flex-1 py-3 rounded-xl bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 active:scale-[0.98] transition-all disabled:opacity-50"
+              >
+                {isFlipping ? '翻页中...' : (currentPage === 0 ? '翻开' : '再翻一页')}
+              </button>
+            )}
           </div>
 
           {history.length > 0 && (
@@ -302,6 +229,46 @@ export default function AnswerBook() {
           )}
         </div>
       </div>
+
+      <style>{`
+        .flipbook {
+          position: relative;
+          transform-style: preserve-3d;
+          perspective: 1000px;
+        }
+
+        .leaf {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          transform-style: preserve-3d;
+          transition: transform 0.8s ease-in-out;
+          transform-origin: left center;
+        }
+
+        .leaf.flipping {
+          transition: none;
+        }
+
+        .page {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          backface-visibility: hidden;
+          border-radius: 0 8px 8px 0;
+          overflow: hidden;
+        }
+
+        .page.front {
+          transform: rotateY(0deg);
+          box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .page.back {
+          transform: rotateY(180deg);
+          box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+        }
+      `}</style>
     </PageWrapper>
   )
 }
