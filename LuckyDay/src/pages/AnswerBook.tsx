@@ -5,7 +5,7 @@ import html2canvas from 'html2canvas'
 
 interface PageState {
   id: number
-  answer: Answer | null
+  answer: Answer
   isFlipping: boolean
   flipProgress: number
 }
@@ -17,49 +17,42 @@ export default function AnswerBook() {
   const [history, setHistory] = useState<Answer[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const bookRef = useRef<HTMLDivElement>(null)
-  const animationRef = useRef<{ [key: number]: number }>({})
+  const animationRef = useRef<number | null>(null)
 
   const handleFlip = () => {
-    if (isFlipping || pages.length >= 10) return
+    if (isFlipping) return
 
-    setIsFlipping(true)
+    const answer = getRandomAnswer()
+    setCurrentAnswer(answer)
+    setHistory(prev => [answer, ...prev].slice(0, 10))
 
     const newPage: PageState = {
       id: Date.now(),
-      answer: null,
+      answer,
       isFlipping: true,
       flipProgress: 0
     }
 
     setPages(prev => [...prev, newPage])
+    setIsFlipping(true)
 
     const startTime = Date.now()
-    const duration = 800
-    const pageId = newPage.id
+    const duration = 1000
 
     const animate = () => {
       const elapsed = Date.now() - startTime
       const progress = Math.min(elapsed / duration, 1)
-      const eased = 1 - Math.pow(1 - progress, 3)
+      const eased = 1 - Math.pow(1 - progress, 4)
 
-      setPages(prev => prev.map(p =>
-        p.id === pageId ? { ...p, flipProgress: eased } : p
+      setPages(prev => prev.map((p, i) =>
+        i === prev.length - 1 ? { ...p, flipProgress: eased } : p
       ))
 
-      if (progress >= 0.5 && progress < 0.55) {
-        const answer = getRandomAnswer()
-        setCurrentAnswer(answer)
-        setHistory(prev => [answer, ...prev].slice(0, 10))
-        setPages(prev => prev.map(p =>
-          p.id === pageId ? { ...p, answer } : p
-        ))
-      }
-
       if (progress < 1) {
-        animationRef.current[pageId] = requestAnimationFrame(animate)
+        animationRef.current = requestAnimationFrame(animate)
       } else {
         setPages(prev => prev.map(p =>
-          p.id === pageId ? { ...p, isFlipping: false, flipProgress: 1 } : p
+          p.id === newPage.id ? { ...p, isFlipping: false } : p
         ))
         setIsFlipping(false)
       }
@@ -69,8 +62,9 @@ export default function AnswerBook() {
   }
 
   const handleReset = () => {
-    Object.values(animationRef.current).forEach(id => cancelAnimationFrame(id))
-    animationRef.current = {}
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current)
+    }
     setPages([])
     setCurrentAnswer(null)
     setHistory([])
@@ -102,24 +96,42 @@ export default function AnswerBook() {
 
   useEffect(() => {
     return () => {
-      Object.values(animationRef.current).forEach(id => cancelAnimationFrame(id))
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
     }
   }, [])
 
-  const getPageTransform = (progress: number) => {
+  const getPageStyle = (page: PageState, index: number) => {
+    const isFlipping = page.isFlipping
+    const progress = page.flipProgress
     const rotation = progress * 180
-    return `rotateY(${rotation - 180}deg)`
-  }
 
-  const getPageShadow = (progress: number) => {
-    return `rgba(0, 0, 0, ${0.3 * Math.sin(progress * Math.PI)})`
-  }
-
-  const getCurvedShadow = (progress: number) => {
-    if (progress < 0.5) {
-      return `linear-gradient(to left, rgba(0,0,0,${progress * 0.4}), transparent)`
+    return {
+      transform: `rotateY(${-rotation}deg)`,
+      transformOrigin: 'left center',
+      transformStyle: 'preserve-3d' as const,
+      backfaceVisibility: 'hidden' as const,
+      transition: isFlipping ? 'none' : 'transform 0.3s ease',
+      zIndex: pages.length - index
     }
-    return `linear-gradient(to left, rgba(0,0,0,${(1 - progress) * 0.4}), transparent)`
+  }
+
+  const getBackStyle = (page: PageState) => {
+    const progress = page.flipProgress
+    const rotation = progress * 180
+
+    return {
+      transform: `rotateY(${-rotation + 180}deg)`,
+      transformStyle: 'preserve-3d' as const,
+      backfaceVisibility: 'hidden' as const,
+    }
+  }
+
+  const getFlipShadow = (progress: number) => {
+    if (progress < 0.1 || progress > 0.9) return 'none'
+    const intensity = Math.sin(progress * Math.PI) * 0.4
+    return `rgba(0, 0, 0, ${intensity})`
   }
 
   return (
@@ -135,131 +147,90 @@ export default function AnswerBook() {
             </p>
           </div>
 
-          <div ref={bookRef} className="relative mb-8 py-8">
+          <div ref={bookRef} className="relative mb-8 pt-4">
             <div
               className="relative mx-auto"
-              style={{ perspective: '2000px', perspectiveOrigin: 'center center' }}
+              style={{
+                perspective: '1500px',
+                perspectiveOrigin: 'center center',
+                width: '320px',
+                height: '420px'
+              }}
             >
               <div
-                className="relative w-full max-w-[320px] aspect-[3/4] mx-auto"
+                className="absolute inset-0"
                 style={{ transformStyle: 'preserve-3d' }}
               >
                 <div
-                  className="absolute inset-0 rounded-lg shadow-2xl"
+                  className="absolute inset-0 rounded-lg"
                   style={{
-                    background: 'linear-gradient(135deg, #fef9e7 0%, #f5e6c8 50%, #e8d4a8 100%)',
-                    transform: 'translateZ(-2px)',
-                    boxShadow: 'inset 0 0 30px rgba(139, 119, 89, 0.15), 0 8px 32px rgba(0,0,0,0.15)'
+                    background: 'linear-gradient(180deg, #d4a574 0%, #c49a6c 10%, #f5e6c8 10.5%, #f5e6c8 100%)',
+                    boxShadow: '4px 0 8px rgba(0,0,0,0.2), inset -2px 0 4px rgba(0,0,0,0.1)',
+                    transform: 'translateZ(-1px)'
                   }}
                 >
-                  <div className="absolute inset-0 opacity-[0.03]" style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-                    backgroundSize: '100px 100px'
-                  }} />
+                  <div
+                    className="absolute top-0 left-0 w-3 h-full rounded-l-lg"
+                    style={{
+                      background: 'linear-gradient(90deg, #8b7355 0%, #a08060 50%, #c4a882 100%)',
+                      boxShadow: 'inset -2px 0 4px rgba(0,0,0,0.2)'
+                    }}
+                  />
                 </div>
 
                 {pages.map((page, index) => (
                   <div
                     key={page.id}
                     className="absolute inset-0"
-                    style={{
-                      transformStyle: 'preserve-3d',
-                      transformOrigin: 'left center',
-                      zIndex: pages.length - index
-                    }}
+                    style={getPageStyle(page, index)}
                   >
                     <div
                       className="absolute inset-0 rounded-lg"
                       style={{
-                        background: page.flipProgress > 0.5
-                          ? 'linear-gradient(135deg, #fef9e7 0%, #f5e6c8 100%)'
-                          : 'linear-gradient(135deg, #1a365d 0%, #0f2744 100%)',
-                        transform: getPageTransform(page.flipProgress),
-                        transformStyle: 'preserve-3d',
-                        backfaceVisibility: 'hidden',
-                        transition: page.isFlipping ? 'none' : 'transform 0.1s ease-out',
-                        boxShadow: page.flipProgress > 0 && page.flipProgress < 1
-                          ? `-2px 0 ${getPageShadow(page.flipProgress)}`
-                          : 'none'
+                        background: 'linear-gradient(180deg, #1a365d 0%, #0f2744 100%)',
+                        boxShadow: page.isFlipping ? `8px 0 ${getFlipShadow(page.flipProgress)}` : '2px 0 4px rgba(0,0,0,0.1)'
                       }}
                     >
-                      {page.flipProgress <= 0.5 ? (
-                        <div className="w-full h-full flex flex-col items-center justify-center p-6">
-                          <div className="text-center mb-4">
-                            <div className="w-14 h-14 mx-auto mb-4 rounded-full border border-amber-400/50 flex items-center justify-center">
-                              <span className="text-xl text-amber-400/80">?</span>
-                            </div>
-                            <h3 className="text-xl font-light text-amber-100/90 tracking-widest">
-                              答案之书
-                            </h3>
-                            <p className="text-xs text-amber-200/50 tracking-wider mt-1">
-                              The Book of Answers
-                            </p>
-                          </div>
-                          <div className="absolute bottom-4 left-0 right-0 text-center">
-                            <span className="text-xs text-amber-200/40">点击翻开</span>
-                          </div>
+                      <div className="w-full h-full flex flex-col items-center justify-center p-6">
+                        <div className="absolute inset-0 opacity-10">
+                          <div className="h-full w-full bg-gradient-to-br from-amber-200/20 to-transparent" />
                         </div>
-                      ) : page.answer ? (
-                        <div className="w-full h-full flex flex-col items-center justify-center p-6">
-                          <div className="text-center">
-                            <p className="text-base text-gray-700 leading-relaxed font-light tracking-wide px-2">
-                              {page.answer.text}
-                            </p>
+                        <div className="text-center relative z-10">
+                          <div className="w-14 h-14 mx-auto mb-4 rounded-full border border-amber-400/50 flex items-center justify-center">
+                            <span className="text-xl text-amber-400/80">?</span>
                           </div>
-                          <div className="absolute bottom-4 right-6">
-                            <span className="text-xs text-gray-400/60">{page.answer.id}</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="w-6 h-6 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin" />
-                        </div>
-                      )}
-
-                      <div
-                        className="absolute inset-0 rounded-lg"
-                        style={{
-                          background: page.flipProgress > 0.5
-                            ? 'linear-gradient(135deg, #1a365d 0%, #0f2744 100%)'
-                            : 'linear-gradient(135deg, #fef9e7 0%, #f5e6c8 100%)',
-                          transform: 'rotateY(180deg)',
-                          backfaceVisibility: 'hidden'
-                        }}
-                      >
-                        <div className="w-full h-full flex items-center justify-center">
-                          {page.flipProgress <= 0.5 && (
-                            <div className="text-center">
-                              <div className="w-14 h-14 mx-auto mb-4 rounded-full border border-amber-400/50 flex items-center justify-center">
-                                <span className="text-xl text-amber-400/80">?</span>
-                              </div>
-                              <h3 className="text-xl font-light text-amber-100/90 tracking-widest">
-                                答案之书
-                              </h3>
-                            </div>
-                          )}
+                          <h3 className="text-xl font-light text-amber-100/90 tracking-widest">
+                            答案之书
+                          </h3>
                         </div>
                       </div>
                     </div>
 
-                    {page.flipProgress > 0.3 && page.flipProgress < 1 && (
-                      <div
-                        className="absolute inset-0 pointer-events-none"
-                        style={{
-                          background: getCurvedShadow(page.flipProgress),
-                          transform: 'translateX(-100%)'
-                        }}
-                      />
-                    )}
+                    <div
+                      className="absolute inset-0 rounded-lg"
+                      style={{
+                        background: 'linear-gradient(180deg, #fef9e7 0%, #f5e6c8 100%)',
+                        ...getBackStyle(page)
+                      }}
+                    >
+                      <div className="w-full h-full flex flex-col items-center justify-center p-6">
+                        <p className="text-base text-gray-700 leading-relaxed font-light tracking-wide text-center px-4">
+                          {page.answer.text}
+                        </p>
+                        <div className="absolute bottom-4 right-6">
+                          <span className="text-xs text-gray-400/60">{page.answer.id}</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ))}
 
                 {!pages.length && (
                   <div
-                    className="absolute inset-0 rounded-lg shadow-2xl cursor-pointer"
+                    className="absolute inset-0 rounded-lg cursor-pointer"
                     style={{
-                      background: 'linear-gradient(135deg, #1a365d 0%, #0f2744 100%)',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 0 60px rgba(0,0,0,0.2)'
+                      background: 'linear-gradient(180deg, #1a365d 0%, #0f2744 100%)',
+                      boxShadow: '4px 0 8px rgba(0,0,0,0.3), inset 0 0 60px rgba(0,0,0,0.3)'
                     }}
                     onClick={handleFlip}
                   >
@@ -267,7 +238,7 @@ export default function AnswerBook() {
                       <div className="absolute inset-0 opacity-10">
                         <div className="h-full w-full bg-gradient-to-br from-amber-200/20 to-transparent" />
                       </div>
-                      <div className="text-center relative">
+                      <div className="text-center relative z-10">
                         <div className="w-16 h-16 mx-auto mb-6 rounded-full border-2 border-amber-400/50 flex items-center justify-center">
                           <span className="text-2xl text-amber-400/80">?</span>
                         </div>
@@ -288,19 +259,19 @@ export default function AnswerBook() {
                 )}
               </div>
 
-              {pages.length > 0 && (
-                <div
-                  className="absolute -left-1 top-0 bottom-0 w-1 rounded-l"
-                  style={{
-                    background: 'linear-gradient(90deg, #8b7355 0%, #a08060 50%, #c4a882 100%)',
-                    transform: 'translateZ(1px)',
-                    boxShadow: '-2px 0 8px rgba(0,0,0,0.2)'
-                  }}
-                />
-              )}
+              <div
+                className="absolute top-0 left-0 w-3 h-full rounded-l-lg"
+                style={{
+                  background: 'linear-gradient(90deg, #5c4a3a 0%, #8b7355 30%, #a08060 50%, #c4a882 100%)',
+                  transform: 'translateZ(0.5px)',
+                  boxShadow: '-2px 0 6px rgba(0,0,0,0.25)'
+                }}
+              />
             </div>
 
-            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-2/3 h-3 bg-gradient-to-t from-gray-300/40 to-transparent rounded-full blur-sm" />
+            <div
+              className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-2/3 h-6 bg-gradient-to-t from-gray-300/50 to-transparent rounded-full blur-md"
+            />
           </div>
 
           <div className="flex gap-3 mb-8">
@@ -333,15 +304,13 @@ export default function AnswerBook() {
                 )}
               </button>
             )}
-            {pages.length > 0 && pages.length < 10 && (
-              <button
-                onClick={handleFlip}
-                disabled={isFlipping}
-                className="flex-1 py-3 rounded-xl bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 active:scale-[0.98] transition-all disabled:opacity-50"
-              >
-                {isFlipping ? '翻页中...' : '再翻一页'}
-              </button>
-            )}
+            <button
+              onClick={handleFlip}
+              disabled={isFlipping}
+              className="flex-1 py-3 rounded-xl bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 active:scale-[0.98] transition-all disabled:opacity-50"
+            >
+              {isFlipping ? '翻页中...' : (pages.length ? '再翻一页' : '翻开')}
+            </button>
           </div>
 
           {history.length > 0 && (
