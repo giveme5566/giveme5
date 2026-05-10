@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import PageWrapper from '../components/PageWrapper'
 import { getRandomAnswer, type Answer } from '../data/answers'
 import html2canvas from 'html2canvas'
@@ -20,6 +20,10 @@ export default function AnswerBook() {
 
     setIsFlipping(true)
     setTimeout(() => {
+      const prevAnswer = pages[currentPage]
+      if (prevAnswer) {
+        setHistory(h => [prevAnswer, ...h].slice(0, 10))
+      }
       setCurrentPage(prev => prev + 1)
       setIsFlipping(false)
     }, 800)
@@ -31,9 +35,16 @@ export default function AnswerBook() {
     setHistory([])
   }
 
-  const handleNewAnswer = (index: number) => {
+  const handleNewAnswer = () => {
+    if (isFlipping || currentPage >= PAGE_COUNT - 1) return
+
+    setIsFlipping(true)
     const newAnswer = getRandomAnswer()
-    setPages(prev => prev.map((p, i) => i === index ? newAnswer : p))
+    setPages(prev => prev.map((p, i) => i === currentPage ? newAnswer : p))
+
+    setTimeout(() => {
+      setIsFlipping(false)
+    }, 800)
   }
 
   const handleSaveImage = async () => {
@@ -58,15 +69,6 @@ export default function AnswerBook() {
       setIsSaving(false)
     }
   }
-
-  useEffect(() => {
-    if (currentPage > 0) {
-      const prevAnswer = pages[currentPage - 1]
-      if (prevAnswer) {
-        setHistory(h => [prevAnswer, ...h].slice(0, 10))
-      }
-    }
-  }, [currentPage, pages])
 
   return (
     <PageWrapper title="答案之书">
@@ -103,41 +105,16 @@ export default function AnswerBook() {
 
               {pages.map((page, index) => {
                 const isFlipped = index < currentPage
-                const isCurrent = index === currentPage
-                const showFront = !isFlipped
 
                 return (
                   <div
                     key={index}
-                    className={`leaf ${isCurrent && isFlipping ? 'flipping' : ''}`}
+                    className={`leaf ${isFlipping && index === currentPage ? 'flipping' : ''}`}
                     style={{
                       transform: isFlipped ? 'rotateY(-180deg)' : 'rotateY(0)',
+                      zIndex: pages.length - index
                     }}
                   >
-                    <div
-                      className="page front"
-                      style={{
-                        transform: 'rotateY(0deg)',
-                        background: 'linear-gradient(180deg, #fef9e7 0%, #f5e6c8 100%)',
-                        display: showFront ? 'flex' : 'none'
-                      }}
-                    >
-                      <div className="w-full h-full flex flex-col items-center justify-center p-6">
-                        <p className="text-base text-gray-700 leading-relaxed font-light tracking-wide text-center px-4">
-                          {page?.text}
-                        </p>
-                        <div className="absolute bottom-4 right-6 flex items-center gap-2">
-                          <span className="text-xs text-gray-400/60">{page?.id}</span>
-                          <button
-                            onClick={() => handleNewAnswer(index)}
-                            className="text-xs text-amber-500 hover:text-amber-600"
-                          >
-                            换答案
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
                     <div
                       className="page back"
                       style={{
@@ -157,6 +134,39 @@ export default function AnswerBook() {
                             答案之书
                           </h3>
                         </div>
+                      </div>
+                    </div>
+
+                    <div
+                      className="page front"
+                      style={{
+                        transform: 'rotateY(0deg)',
+                        background: 'linear-gradient(180deg, #fef9e7 0%, #f5e6c8 100%)'
+                      }}
+                    >
+                      <div className="w-full h-full flex flex-col items-center justify-center p-6">
+                        {page ? (
+                          <>
+                            <p className="text-base text-gray-700 leading-relaxed font-light tracking-wide text-center px-4">
+                              {page.text}
+                            </p>
+                            <div className="absolute bottom-4 right-6 flex items-center gap-2">
+                              <span className="text-xs text-gray-400/60">{page.id}</span>
+                              {index === currentPage && (
+                                <button
+                                  onClick={handleNewAnswer}
+                                  className="text-xs text-amber-500 hover:text-amber-600"
+                                >
+                                  换答案
+                                </button>
+                              )}
+                            </div>
+                          </>
+                        ) : (
+                          <div className="text-center text-gray-400">
+                            <p className="text-sm">点击下方按钮翻开</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -199,7 +209,7 @@ export default function AnswerBook() {
                 )}
               </button>
             )}
-            {currentPage < PAGE_COUNT - 1 && (
+            {currentPage < PAGE_COUNT && (
               <button
                 onClick={handleFlip}
                 disabled={isFlipping}
