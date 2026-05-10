@@ -102,32 +102,6 @@ export default function AnswerBook() {
     }
   }, [])
 
-  const getPageStyle = (page: PageState, index: number) => {
-    const isFlipping = page.isFlipping
-    const progress = page.flipProgress
-    const rotation = progress * 180
-
-    return {
-      transform: `rotateY(${-rotation}deg)`,
-      transformOrigin: 'left center',
-      transformStyle: 'preserve-3d' as const,
-      backfaceVisibility: 'hidden' as const,
-      transition: isFlipping ? 'none' : 'transform 0.3s ease',
-      zIndex: pages.length - index
-    }
-  }
-
-  const getBackStyle = (page: PageState) => {
-    const progress = page.flipProgress
-    const rotation = progress * 180
-
-    return {
-      transform: `rotateY(${-rotation + 180}deg)`,
-      transformStyle: 'preserve-3d' as const,
-      backfaceVisibility: 'hidden' as const,
-    }
-  }
-
   const getFlipShadow = (progress: number) => {
     if (progress < 0.1 || progress > 0.9) return 'none'
     const intensity = Math.sin(progress * Math.PI) * 0.4
@@ -178,52 +152,65 @@ export default function AnswerBook() {
                   />
                 </div>
 
-                {pages.map((page, index) => (
-                  <div
-                    key={page.id}
-                    className="absolute inset-0"
-                    style={getPageStyle(page, index)}
-                  >
-                    <div
-                      className="absolute inset-0 rounded-lg"
-                      style={{
-                        background: 'linear-gradient(180deg, #1a365d 0%, #0f2744 100%)',
-                        boxShadow: page.isFlipping ? `8px 0 ${getFlipShadow(page.flipProgress)}` : '2px 0 4px rgba(0,0,0,0.1)'
-                      }}
-                    >
-                      <div className="w-full h-full flex flex-col items-center justify-center p-6">
-                        <div className="absolute inset-0 opacity-10">
-                          <div className="h-full w-full bg-gradient-to-br from-amber-200/20 to-transparent" />
-                        </div>
-                        <div className="text-center relative z-10">
-                          <div className="w-14 h-14 mx-auto mb-4 rounded-full border border-amber-400/50 flex items-center justify-center">
-                            <span className="text-xl text-amber-400/80">?</span>
-                          </div>
-                          <h3 className="text-xl font-light text-amber-100/90 tracking-widest">
-                            答案之书
-                          </h3>
-                        </div>
-                      </div>
-                    </div>
+                {pages.map((page, index) => {
+                  const rotation = page.flipProgress * 180
+                  const showBack = page.flipProgress > 0.5
 
+                  return (
                     <div
-                      className="absolute inset-0 rounded-lg"
+                      key={page.id}
+                      className="absolute inset-0"
                       style={{
-                        background: 'linear-gradient(180deg, #fef9e7 0%, #f5e6c8 100%)',
-                        ...getBackStyle(page)
+                        transformStyle: 'preserve-3d',
+                        transform: `rotateY(${rotation}deg)`,
+                        transformOrigin: 'left center',
+                        transition: page.isFlipping ? 'none' : 'transform 0.3s ease',
+                        zIndex: pages.length - index
                       }}
                     >
-                      <div className="w-full h-full flex flex-col items-center justify-center p-6">
-                        <p className="text-base text-gray-700 leading-relaxed font-light tracking-wide text-center px-4">
-                          {page.answer.text}
-                        </p>
-                        <div className="absolute bottom-4 right-6">
-                          <span className="text-xs text-gray-400/60">{page.answer.id}</span>
+                      <div
+                        className="absolute inset-0 rounded-lg"
+                        style={{
+                          background: 'linear-gradient(180deg, #1a365d 0%, #0f2744 100%)',
+                          boxShadow: page.isFlipping ? `8px 0 ${getFlipShadow(page.flipProgress)}` : '2px 0 4px rgba(0,0,0,0.1)',
+                          backfaceVisibility: 'hidden',
+                          transform: 'rotateY(180deg)'
+                        }}
+                      >
+                        <div className="w-full h-full flex flex-col items-center justify-center p-6">
+                          <div className="absolute inset-0 opacity-10">
+                            <div className="h-full w-full bg-gradient-to-br from-amber-200/20 to-transparent" />
+                          </div>
+                          <div className="text-center relative z-10">
+                            <div className="w-14 h-14 mx-auto mb-4 rounded-full border border-amber-400/50 flex items-center justify-center">
+                              <span className="text-xl text-amber-400/80">?</span>
+                            </div>
+                            <h3 className="text-xl font-light text-amber-100/90 tracking-widest">
+                              答案之书
+                            </h3>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div
+                        className="absolute inset-0 rounded-lg"
+                        style={{
+                          background: 'linear-gradient(180deg, #fef9e7 0%, #f5e6c8 100%)',
+                          backfaceVisibility: 'hidden'
+                        }}
+                      >
+                        <div className="w-full h-full flex flex-col items-center justify-center p-6">
+                          <p className="text-base text-gray-700 leading-relaxed font-light tracking-wide text-center px-4">
+                            {page.answer.text}
+                          </p>
+                          <div className="absolute bottom-4 right-6">
+                            <span className="text-xs text-gray-400/60">{page.answer.id}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
 
                 {!pages.length && (
                   <div
