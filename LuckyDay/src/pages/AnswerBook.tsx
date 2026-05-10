@@ -8,7 +8,7 @@ const PAGE_COUNT = 5
 export default function AnswerBook() {
   const [currentPage, setCurrentPage] = useState(-1)
   const [pages, setPages] = useState<(Answer | null)[]>(() =>
-    Array(PAGE_COUNT).fill(null).map(() => getRandomAnswer())
+    Array(PAGE_COUNT).fill(null)
   )
   const [history, setHistory] = useState<Answer[]>([])
   const [isSaving, setIsSaving] = useState(false)
@@ -36,13 +36,8 @@ export default function AnswerBook() {
 
   const handleReset = () => {
     setCurrentPage(-1)
-    setPages(Array(PAGE_COUNT).fill(null).map(() => getRandomAnswer()))
+    setPages(Array(PAGE_COUNT).fill(null))
     setHistory([])
-  }
-
-  const handleNewAnswer = () => {
-    const newAnswer = getRandomAnswer()
-    setPages(prev => prev.map((p, i) => i === currentPage ? newAnswer : p))
   }
 
   const handleSaveImage = async () => {
@@ -154,16 +149,8 @@ export default function AnswerBook() {
                             <p className="text-base text-gray-700 leading-relaxed font-light tracking-wide text-center px-4">
                               {page.text}
                             </p>
-                            <div className="absolute bottom-4 right-6 flex items-center gap-2">
+                            <div className="absolute bottom-4 right-6">
                               <span className="text-xs text-gray-400/60">{page.id}</span>
-                              {index === currentPage && (
-                                <button
-                                  onClick={handleNewAnswer}
-                                  className="text-xs text-amber-500 hover:text-amber-600"
-                                >
-                                  换答案
-                                </button>
-                              )}
                             </div>
                           </>
                         ) : (
