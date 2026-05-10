@@ -164,7 +164,7 @@ export default function AnswerBook() {
                     className="absolute inset-0"
                     style={{
                       transformStyle: 'preserve-3d',
-                      transformOrigin: 'right center',
+                      transformOrigin: 'left center',
                       zIndex: pages.length - index
                     }}
                   >
