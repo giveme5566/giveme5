@@ -57,6 +57,37 @@ const zodiacMapping: Record<string, string> = {
   'pisces': 'shuangyu'
 }
 
+// 根据评分生成运势描述
+function generateFortuneDesc(score: number, type: string): string {
+  const descMap: Record<number, string[]> = {
+    100: [`${type}极佳，是展现自我的好时机`, `${type}非常顺利，把握机会`, `${type}满分，尽情享受`],
+    80: [`${type}良好，保持积极心态`, `${type}不错，稳步推进`, `${type}较好，继续努力`],
+    60: [`${type}平稳，稳中求进`, `${type}一般，保持耐心`, `${type}平淡，调整状态`],
+    40: [`${type}欠佳，需要谨慎`, `${type}低迷，保持低调`, `${type}不顺，静待时机`],
+    20: [`type}较差，多加小心`, `${type}低迷，避免冲动`, `${type}困难，坚持度过`]
+  }
+  
+  // 找到最接近的评分档位
+  const scores = [100, 80, 60, 40, 20]
+  const closestScore = scores.find(s => score >= s - 10) || 20
+  const descs = descMap[closestScore]
+  return descs[Math.floor(Math.random() * descs.length)]
+}
+
+// 解析评分
+function parseScore(info: string[], keyword: string): number {
+  const item = info.find((i: string) => i.includes(keyword))
+  if (!item) return 60
+  const match = item.match(/(\d+)/)
+  return match ? parseInt(match[1]) : 60
+}
+
+// 解析info字段
+function parseInfoItem(info: string[], keyword: string): string {
+  const item = info.find((i: string) => i.includes(keyword))
+  return item ? item.replace(`${keyword}：`, '').trim() : ''
+}
+
 export async function fetchHoroscope(zodiacId: string): Promise<HoroscopeData | null> {
   const starName = zodiacMapping[zodiacId]
   if (!starName) {
@@ -96,41 +127,69 @@ export async function fetchHoroscope(zodiacId: string): Promise<HoroscopeData | 
 
     const detail = zodiacData.detail
 
+    // 解析今日运势
+    const todayInfo = detail.today?.info || []
+    const todayScores = {
+      all: parseScore(todayInfo, '综合运势'),
+      love: parseScore(todayInfo, '爱情运势'),
+      wealth: parseScore(todayInfo, '财富运势'),
+      work: parseScore(todayInfo, '工作运势')
+    }
+
+    // 解析本周运势
+    const weekInfo = detail.weeks?.info || []
+    const weekScores = {
+      all: parseScore(weekInfo, '综合运势'),
+      love: parseScore(weekInfo, '爱情运势'),
+      wealth: parseScore(weekInfo, '财富运势'),
+      work: parseScore(weekInfo, '工作运势'),
+      health: parseScore(weekInfo, '健康运势')
+    }
+
+    // 解析本月运势
+    const monthInfo = detail.month?.info || []
+    const monthScores = {
+      all: parseScore(monthInfo, '综合运势'),
+      love: parseScore(monthInfo, '爱情运势'),
+      wealth: parseScore(monthInfo, '财富运势'),
+      work: parseScore(monthInfo, '工作运势')
+    }
+
     return {
       today: {
-        summary: detail.today?.list?.find((item: any) => item.title?.includes('概述'))?.desc || '',
-        love: detail.today?.list?.find((item: any) => item.title?.includes('爱情'))?.desc || '',
-        wealth: detail.today?.list?.find((item: any) => item.title?.includes('财富'))?.desc || '',
-        work: detail.today?.list?.find((item: any) => item.title?.includes('事业'))?.desc || '',
-        notice: detail.today?.list?.find((item: any) => item.title?.includes('注意事项'))?.desc || '',
-        luckyNumber: detail.today?.info?.find((item: string) => item.includes('幸运数字'))?.replace('幸运数字：', '') || '',
-        luckyTime: detail.today?.info?.find((item: string) => item.includes('幸运时间'))?.replace('幸运时间：', '') || '',
-        luckyColor: detail.today?.info?.find((item: string) => item.includes('幸运颜色'))?.replace('幸运颜色：', '') || '',
-        luckyStar: detail.today?.info?.find((item: string) => item.includes('贵人星座'))?.replace('贵人星座：', '') || ''
+        summary: generateFortuneDesc(todayScores.all, '整体运势'),
+        love: generateFortuneDesc(todayScores.love, '爱情运势'),
+        wealth: generateFortuneDesc(todayScores.wealth, '财富运势'),
+        work: generateFortuneDesc(todayScores.work, '事业运势'),
+        notice: todayScores.all >= 80 ? '今日运势不错，把握机会' : todayScores.all >= 60 ? '保持平常心，稳中求进' : '今日需谨慎，避免冲动',
+        luckyNumber: parseInfoItem(todayInfo, '幸运数字'),
+        luckyTime: parseInfoItem(todayInfo, '幸运时间'),
+        luckyColor: parseInfoItem(todayInfo, '幸运颜色'),
+        luckyStar: parseInfoItem(todayInfo, '贵人星座')
       },
       week: {
-        summary: detail.weeks?.list?.find((item: any) => item.title?.includes('概述'))?.desc || '',
-        love: detail.weeks?.list?.find((item: any) => item.title?.includes('爱情'))?.desc || '',
-        wealth: detail.weeks?.list?.find((item: any) => item.title?.includes('财富'))?.desc || '',
-        work: detail.weeks?.list?.find((item: any) => item.title?.includes('事业'))?.desc || '',
-        health: detail.weeks?.list?.find((item: any) => item.title?.includes('健康'))?.desc || '',
-        notice: detail.weeks?.list?.find((item: any) => item.title?.includes('注意事项'))?.desc || '',
-        luckyNumber: detail.weeks?.info?.find((item: string) => item.includes('幸运数字'))?.replace('幸运数字：', '') || '',
-        luckyDay: detail.weeks?.info?.find((item: string) => item.includes('幸运时间'))?.replace('幸运时间：', '') || '',
-        luckyColor: detail.weeks?.info?.find((item: string) => item.includes('幸运颜色'))?.replace('幸运颜色：', '') || '',
-        luckyStar: detail.weeks?.info?.find((item: string) => item.includes('贵人星座'))?.replace('贵人星座：', '') || '',
-        unluckyStar: detail.weeks?.info?.find((item: string) => item.includes('小人星座'))?.replace('小人星座：', '') || ''
+        summary: generateFortuneDesc(weekScores.all, '本周整体'),
+        love: generateFortuneDesc(weekScores.love, '爱情运势'),
+        wealth: generateFortuneDesc(weekScores.wealth, '财富运势'),
+        work: generateFortuneDesc(weekScores.work, '事业运势'),
+        health: generateFortuneDesc(weekScores.health, '健康运势'),
+        notice: weekScores.all >= 80 ? '本周运势较好，积极行动' : weekScores.all >= 60 ? '本周平稳，按部就班' : '本周需谨慎，稳扎稳打',
+        luckyNumber: parseInfoItem(weekInfo, '幸运数字'),
+        luckyDay: parseInfoItem(weekInfo, '幸运时间'),
+        luckyColor: parseInfoItem(weekInfo, '幸运颜色'),
+        luckyStar: parseInfoItem(weekInfo, '贵人星座'),
+        unluckyStar: parseInfoItem(weekInfo, '小人星座')
       },
       month: {
-        summary: detail.month?.list?.find((item: any) => item.title?.includes('概述'))?.desc || '',
-        love: detail.month?.list?.find((item: any) => item.title?.includes('爱情'))?.desc || '',
-        wealth: detail.month?.list?.find((item: any) => item.title?.includes('财富'))?.desc || '',
-        work: detail.month?.list?.find((item: any) => item.title?.includes('事业'))?.desc || '',
-        advantage: detail.month?.list?.find((item: any) => item.title?.includes('优势'))?.desc || '',
-        weakness: detail.month?.list?.find((item: any) => item.title?.includes('弱势'))?.desc || '',
-        luckyStar: detail.month?.info?.find((item: string) => item.includes('贵人星座'))?.replace('贵人星座：', '') || '',
-        unluckyStar: detail.month?.info?.find((item: string) => item.includes('小人星座'))?.replace('小人星座：', '') || '',
-        fateStar: detail.month?.info?.find((item: string) => item.includes('缘份星座'))?.replace('缘份星座：', '') || ''
+        summary: generateFortuneDesc(monthScores.all, '本月整体'),
+        love: generateFortuneDesc(monthScores.love, '爱情运势'),
+        wealth: generateFortuneDesc(monthScores.wealth, '财富运势'),
+        work: generateFortuneDesc(monthScores.work, '事业运势'),
+        advantage: monthScores.all >= 80 ? '运势强劲，把握机遇' : monthScores.all >= 60 ? '稳中有进，持续努力' : '需要耐心，厚积薄发',
+        weakness: monthScores.all >= 80 ? '避免骄傲，保持谦逊' : monthScores.all >= 60 ? '注意细节，防范风险' : '谨慎行事，避免冲动',
+        luckyStar: parseInfoItem(monthInfo, '贵人星座'),
+        unluckyStar: parseInfoItem(monthInfo, '小人星座'),
+        fateStar: parseInfoItem(monthInfo, '缘份星座')
       }
     }
   } catch (error) {
