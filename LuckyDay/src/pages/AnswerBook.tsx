@@ -18,6 +18,7 @@ export default function AnswerBook() {
   const handleFlip = () => {
     const nextPage = currentPage + 1
     if (nextPage >= PAGE_COUNT) return
+    if (flippingPage >= 0) return
 
     // 生成新答案
     const newAnswer = getRandomAnswer()
@@ -110,6 +111,9 @@ export default function AnswerBook() {
     </div>
   )
 
+  // 判断是否可以翻页
+  const canFlip = currentPage < PAGE_COUNT - 1 && flippingPage < 0
+
   return (
     <PageWrapper title="答案之书">
       <div className="px-5 py-6">
@@ -125,8 +129,9 @@ export default function AnswerBook() {
 
           <div ref={bookRef} className="relative mb-8 pt-4">
             <div
-              className="flipbook mx-auto"
+              className={`flipbook mx-auto ${canFlip ? 'cursor-pointer' : 'cursor-default'}`}
               style={{ width: '300px', height: '400px' }}
+              onClick={canFlip ? handleFlip : undefined}
             >
               {/* 书底座（左侧已翻页区域） */}
               <div
@@ -199,7 +204,7 @@ export default function AnswerBook() {
                         <AnswerPage answer={page} />
                       ) : (
                         <div className="w-full h-full flex flex-col items-center justify-center p-6">
-                          <p className="text-sm text-gray-400">点击下方按钮翻开</p>
+                          <p className="text-sm text-gray-400">点击书页翻开</p>
                         </div>
                       )}
                     </div>
@@ -251,15 +256,6 @@ export default function AnswerBook() {
                     保存图片
                   </>
                 )}
-              </button>
-            )}
-            {currentPage < PAGE_COUNT - 1 && (
-              <button
-                onClick={handleFlip}
-                disabled={flippingPage >= 0}
-                className="flex-1 py-3 rounded-xl bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 active:scale-[0.98] transition-all disabled:opacity-50"
-              >
-                {flippingPage >= 0 ? '翻页中...' : (currentPage === -1 ? '翻开' : '再翻一页')}
               </button>
             )}
           </div>
