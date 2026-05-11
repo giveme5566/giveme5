@@ -19,6 +19,15 @@ export default function AnswerBook() {
     const nextPage = currentPage + 1
     if (nextPage >= PAGE_COUNT) return
 
+    // 生成新答案
+    const newAnswer = getRandomAnswer()
+    setPages(prev => {
+      const newPages = [...prev]
+      newPages[nextPage] = newAnswer
+      return newPages
+    })
+
+    // 将当前答案加入历史
     if (currentPage >= 0) {
       const prevAnswer = pages[currentPage]
       if (prevAnswer) {
@@ -63,6 +72,44 @@ export default function AnswerBook() {
     }
   }
 
+  // 封面组件
+  const CoverPage = () => (
+    <div className="w-full h-full flex flex-col items-center justify-center p-6">
+      <div className="absolute inset-0 opacity-10">
+        <div className="h-full w-full bg-gradient-to-br from-amber-200/20 to-transparent" />
+      </div>
+      <div className="text-center relative z-10">
+        <div className="w-14 h-14 mx-auto mb-4 rounded-full border border-amber-400/50 flex items-center justify-center">
+          <span className="text-xl text-amber-400/80">?</span>
+        </div>
+        <h3 className="text-xl font-light text-amber-100/90 tracking-widest">
+          答案之书
+        </h3>
+      </div>
+    </div>
+  )
+
+  // 空白内页组件（用于已翻过的页面背面）
+  const BlankInnerPage = () => (
+    <div className="w-full h-full flex flex-col items-center justify-center p-6">
+      <div className="absolute inset-0 opacity-5">
+        <div className="h-full w-full bg-gradient-to-br from-amber-800/10 to-transparent" />
+      </div>
+    </div>
+  )
+
+  // 答案内页组件
+  const AnswerPage = ({ answer }: { answer: Answer }) => (
+    <div className="w-full h-full flex flex-col items-center justify-center p-6">
+      <p className="text-base text-gray-700 leading-relaxed font-light tracking-wide text-center px-4">
+        {answer.text}
+      </p>
+      <div className="absolute bottom-4 right-6">
+        <span className="text-xs text-gray-400/60">{answer.id}</span>
+      </div>
+    </div>
+  )
+
   return (
     <PageWrapper title="答案之书">
       <div className="px-5 py-6">
@@ -81,6 +128,7 @@ export default function AnswerBook() {
               className="flipbook mx-auto"
               style={{ width: '300px', height: '400px' }}
             >
+              {/* 书底座（左侧已翻页区域） */}
               <div
                 className="book-base absolute inset-0 rounded-lg overflow-hidden"
                 style={{
@@ -96,9 +144,40 @@ export default function AnswerBook() {
                 />
               </div>
 
+              {/* 封面（第 -1 层，初始可见） */}
+              <div
+                className={`leaf cover-leaf ${flippingPage === 0 ? 'flipping' : ''}`}
+                style={{
+                  transform: currentPage >= 0 ? 'rotateY(-180deg)' : 'rotateY(0deg)',
+                  zIndex: PAGE_COUNT + 1
+                }}
+              >
+                {/* 封面正面（深蓝色封面） */}
+                <div
+                  className="page front"
+                  style={{
+                    background: 'linear-gradient(180deg, #1a365d 0%, #0f2744 100%)'
+                  }}
+                >
+                  <CoverPage />
+                </div>
+                {/* 封面背面（空白内页） */}
+                <div
+                  className="page back"
+                  style={{
+                    transform: 'rotateY(180deg)',
+                    background: 'linear-gradient(180deg, #fef9e7 0%, #f5e6c8 100%)'
+                  }}
+                >
+                  <BlankInnerPage />
+                </div>
+              </div>
+
+              {/* 内页（第 0 到 PAGE_COUNT-1） */}
               {pages.map((page, index) => {
                 const isFlipped = index < currentPage
                 const isFlipping = index === flippingPage
+                const isCurrent = index === currentPage
 
                 return (
                   <div
@@ -106,59 +185,33 @@ export default function AnswerBook() {
                     className={`leaf ${isFlipping ? 'flipping' : ''}`}
                     style={{
                       transform: isFlipped ? 'rotateY(-180deg)' : 'rotateY(0deg)',
-                      zIndex: pages.length - index
-                    }}
-                    onAnimationEnd={() => {
-                      if (isFlipping) {
-                        setFlippingPage(-1)
-                      }
+                      zIndex: PAGE_COUNT - index
                     }}
                   >
+                    {/* 内页正面（显示答案） */}
+                    <div
+                      className="page front"
+                      style={{
+                        background: 'linear-gradient(180deg, #fef9e7 0%, #f5e6c8 100%)'
+                      }}
+                    >
+                      {page ? (
+                        <AnswerPage answer={page} />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center p-6">
+                          <p className="text-sm text-gray-400">点击下方按钮翻开</p>
+                        </div>
+                      )}
+                    </div>
+                    {/* 内页背面（空白） */}
                     <div
                       className="page back"
                       style={{
                         transform: 'rotateY(180deg)',
-                        background: 'linear-gradient(180deg, #1a365d 0%, #0f2744 100%)'
-                      }}
-                    >
-                      <div className="w-full h-full flex flex-col items-center justify-center p-6">
-                        <div className="absolute inset-0 opacity-10">
-                          <div className="h-full w-full bg-gradient-to-br from-amber-200/20 to-transparent" />
-                        </div>
-                        <div className="text-center relative z-10">
-                          <div className="w-14 h-14 mx-auto mb-4 rounded-full border border-amber-400/50 flex items-center justify-center">
-                            <span className="text-xl text-amber-400/80">?</span>
-                          </div>
-                          <h3 className="text-xl font-light text-amber-100/90 tracking-widest">
-                            答案之书
-                          </h3>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      className="page front"
-                      style={{
-                        transform: 'rotateY(0deg)',
                         background: 'linear-gradient(180deg, #fef9e7 0%, #f5e6c8 100%)'
                       }}
                     >
-                      <div className="w-full h-full flex flex-col items-center justify-center p-6">
-                        {page ? (
-                          <>
-                            <p className="text-base text-gray-700 leading-relaxed font-light tracking-wide text-center px-4">
-                              {page.text}
-                            </p>
-                            <div className="absolute bottom-4 right-6">
-                              <span className="text-xs text-gray-400/60">{page.id}</span>
-                            </div>
-                          </>
-                        ) : (
-                          <div className="text-center text-gray-400">
-                            <p className="text-sm">点击下方按钮翻开</p>
-                          </div>
-                        )}
-                      </div>
+                      <BlankInnerPage />
                     </div>
                   </div>
                 )
@@ -269,7 +322,6 @@ export default function AnswerBook() {
         }
 
         .page.back {
-          transform: rotateY(180deg);
           box-shadow: -2px 0 15px rgba(0,0,0,0.15);
         }
       `}</style>
