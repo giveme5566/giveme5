@@ -1,5 +1,13 @@
 import type { ZodiacSign } from '../data/zodiac'
 
+export interface FortuneScores {
+  all: number
+  love: number
+  wealth: number
+  work: number
+  health?: number
+}
+
 export interface HoroscopeData {
   today: {
     summary: string
@@ -11,6 +19,8 @@ export interface HoroscopeData {
     luckyTime: string
     luckyColor: string
     luckyStar: string
+    scores: FortuneScores
+    hasText: boolean
   }
   week: {
     summary: string
@@ -24,6 +34,8 @@ export interface HoroscopeData {
     luckyColor: string
     luckyStar: string
     unluckyStar: string
+    scores: FortuneScores
+    hasText: boolean
   }
   month: {
     summary: string
@@ -35,6 +47,8 @@ export interface HoroscopeData {
     luckyStar: string
     unluckyStar: string
     fateStar: string
+    scores: FortuneScores
+    hasText: boolean
   }
 }
 
@@ -64,7 +78,7 @@ function generateFortuneDesc(score: number, type: string): string {
     80: [`${type}良好，保持积极心态`, `${type}不错，稳步推进`, `${type}较好，继续努力`],
     60: [`${type}平稳，稳中求进`, `${type}一般，保持耐心`, `${type}平淡，调整状态`],
     40: [`${type}欠佳，需要谨慎`, `${type}低迷，保持低调`, `${type}不顺，静待时机`],
-    20: [`type}较差，多加小心`, `${type}低迷，避免冲动`, `${type}困难，坚持度过`]
+    20: [`${type}较差，多加小心`, `${type}低迷，避免冲动`, `${type}困难，坚持度过`]
   }
   
   // 找到最接近的评分档位
@@ -86,6 +100,19 @@ function parseScore(info: string[], keyword: string): number {
 function parseInfoItem(info: string[], keyword: string): string {
   const item = info.find((i: string) => i.includes(keyword))
   return item ? item.replace(`${keyword}：`, '').trim() : ''
+}
+
+// 检查是否有实际文本描述
+function hasActualText(list: Array<{ title: string; desc: string }>): boolean {
+  if (!list || list.length === 0) return false
+  return list.some(item => item.desc && item.desc.trim().length > 0)
+}
+
+// 从list中提取文本描述
+function extractTextFromList(list: Array<{ title: string; desc: string }>, keyword: string): string {
+  if (!list) return ''
+  const item = list.find((i: { title: string; desc: string }) => i.title.includes(keyword))
+  return item?.desc?.trim() || ''
 }
 
 export async function fetchHoroscope(zodiacId: string): Promise<HoroscopeData | null> {
@@ -129,15 +156,18 @@ export async function fetchHoroscope(zodiacId: string): Promise<HoroscopeData | 
 
     // 解析今日运势
     const todayInfo = detail.today?.info || []
+    const todayList = detail.today?.list || []
     const todayScores = {
       all: parseScore(todayInfo, '综合运势'),
       love: parseScore(todayInfo, '爱情运势'),
       wealth: parseScore(todayInfo, '财富运势'),
       work: parseScore(todayInfo, '工作运势')
     }
+    const todayHasText = hasActualText(todayList)
 
     // 解析本周运势
     const weekInfo = detail.weeks?.info || []
+    const weekList = detail.weeks?.list || []
     const weekScores = {
       all: parseScore(weekInfo, '综合运势'),
       love: parseScore(weekInfo, '爱情运势'),
@@ -145,51 +175,86 @@ export async function fetchHoroscope(zodiacId: string): Promise<HoroscopeData | 
       work: parseScore(weekInfo, '工作运势'),
       health: parseScore(weekInfo, '健康运势')
     }
+    const weekHasText = hasActualText(weekList)
 
     // 解析本月运势
     const monthInfo = detail.month?.info || []
+    const monthList = detail.month?.list || []
     const monthScores = {
       all: parseScore(monthInfo, '综合运势'),
       love: parseScore(monthInfo, '爱情运势'),
       wealth: parseScore(monthInfo, '财富运势'),
       work: parseScore(monthInfo, '工作运势')
     }
+    const monthHasText = hasActualText(monthList)
 
     return {
       today: {
-        summary: generateFortuneDesc(todayScores.all, '整体运势'),
-        love: generateFortuneDesc(todayScores.love, '爱情运势'),
-        wealth: generateFortuneDesc(todayScores.wealth, '财富运势'),
-        work: generateFortuneDesc(todayScores.work, '事业运势'),
+        summary: todayHasText 
+          ? (extractTextFromList(todayList, '概述') || generateFortuneDesc(todayScores.all, '整体运势'))
+          : generateFortuneDesc(todayScores.all, '整体运势'),
+        love: todayHasText
+          ? (extractTextFromList(todayList, '爱情') || generateFortuneDesc(todayScores.love, '爱情运势'))
+          : generateFortuneDesc(todayScores.love, '爱情运势'),
+        wealth: todayHasText
+          ? (extractTextFromList(todayList, '财富') || generateFortuneDesc(todayScores.wealth, '财富运势'))
+          : generateFortuneDesc(todayScores.wealth, '财富运势'),
+        work: todayHasText
+          ? (extractTextFromList(todayList, '事业') || generateFortuneDesc(todayScores.work, '事业运势'))
+          : generateFortuneDesc(todayScores.work, '事业运势'),
         notice: todayScores.all >= 80 ? '今日运势不错，把握机会' : todayScores.all >= 60 ? '保持平常心，稳中求进' : '今日需谨慎，避免冲动',
         luckyNumber: parseInfoItem(todayInfo, '幸运数字'),
         luckyTime: parseInfoItem(todayInfo, '幸运时间'),
         luckyColor: parseInfoItem(todayInfo, '幸运颜色'),
-        luckyStar: parseInfoItem(todayInfo, '贵人星座')
+        luckyStar: parseInfoItem(todayInfo, '贵人星座'),
+        scores: todayScores,
+        hasText: todayHasText
       },
       week: {
-        summary: generateFortuneDesc(weekScores.all, '本周整体'),
-        love: generateFortuneDesc(weekScores.love, '爱情运势'),
-        wealth: generateFortuneDesc(weekScores.wealth, '财富运势'),
-        work: generateFortuneDesc(weekScores.work, '事业运势'),
-        health: generateFortuneDesc(weekScores.health, '健康运势'),
+        summary: weekHasText
+          ? (extractTextFromList(weekList, '概述') || generateFortuneDesc(weekScores.all, '本周整体'))
+          : generateFortuneDesc(weekScores.all, '本周整体'),
+        love: weekHasText
+          ? (extractTextFromList(weekList, '爱情') || generateFortuneDesc(weekScores.love, '爱情运势'))
+          : generateFortuneDesc(weekScores.love, '爱情运势'),
+        wealth: weekHasText
+          ? (extractTextFromList(weekList, '财富') || generateFortuneDesc(weekScores.wealth, '财富运势'))
+          : generateFortuneDesc(weekScores.wealth, '财富运势'),
+        work: weekHasText
+          ? (extractTextFromList(weekList, '事业') || generateFortuneDesc(weekScores.work, '事业运势'))
+          : generateFortuneDesc(weekScores.work, '事业运势'),
+        health: weekHasText
+          ? (extractTextFromList(weekList, '健康') || generateFortuneDesc(weekScores.health || 60, '健康运势'))
+          : generateFortuneDesc(weekScores.health || 60, '健康运势'),
         notice: weekScores.all >= 80 ? '本周运势较好，积极行动' : weekScores.all >= 60 ? '本周平稳，按部就班' : '本周需谨慎，稳扎稳打',
         luckyNumber: parseInfoItem(weekInfo, '幸运数字'),
         luckyDay: parseInfoItem(weekInfo, '幸运时间'),
         luckyColor: parseInfoItem(weekInfo, '幸运颜色'),
         luckyStar: parseInfoItem(weekInfo, '贵人星座'),
-        unluckyStar: parseInfoItem(weekInfo, '小人星座')
+        unluckyStar: parseInfoItem(weekInfo, '小人星座'),
+        scores: weekScores,
+        hasText: weekHasText
       },
       month: {
-        summary: generateFortuneDesc(monthScores.all, '本月整体'),
-        love: generateFortuneDesc(monthScores.love, '爱情运势'),
-        wealth: generateFortuneDesc(monthScores.wealth, '财富运势'),
-        work: generateFortuneDesc(monthScores.work, '事业运势'),
+        summary: monthHasText
+          ? (extractTextFromList(monthList, '概述') || generateFortuneDesc(monthScores.all, '本月整体'))
+          : generateFortuneDesc(monthScores.all, '本月整体'),
+        love: monthHasText
+          ? (extractTextFromList(monthList, '爱情') || generateFortuneDesc(monthScores.love, '爱情运势'))
+          : generateFortuneDesc(monthScores.love, '爱情运势'),
+        wealth: monthHasText
+          ? (extractTextFromList(monthList, '财富') || generateFortuneDesc(monthScores.wealth, '财富运势'))
+          : generateFortuneDesc(monthScores.wealth, '财富运势'),
+        work: monthHasText
+          ? (extractTextFromList(monthList, '事业') || generateFortuneDesc(monthScores.work, '事业运势'))
+          : generateFortuneDesc(monthScores.work, '事业运势'),
         advantage: monthScores.all >= 80 ? '运势强劲，把握机遇' : monthScores.all >= 60 ? '稳中有进，持续努力' : '需要耐心，厚积薄发',
         weakness: monthScores.all >= 80 ? '避免骄傲，保持谦逊' : monthScores.all >= 60 ? '注意细节，防范风险' : '谨慎行事，避免冲动',
         luckyStar: parseInfoItem(monthInfo, '贵人星座'),
         unluckyStar: parseInfoItem(monthInfo, '小人星座'),
-        fateStar: parseInfoItem(monthInfo, '缘份星座')
+        fateStar: parseInfoItem(monthInfo, '缘份星座'),
+        scores: monthScores,
+        hasText: monthHasText
       }
     }
   } catch (error) {
