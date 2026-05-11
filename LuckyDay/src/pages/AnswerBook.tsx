@@ -41,7 +41,7 @@ export default function AnswerBook() {
     setTimeout(() => {
       setCurrentPage(nextPage)
       setFlippingPage(-1)
-    }, 800)
+    }, 1000)
   }
 
   const handleReset = () => {
@@ -135,16 +135,30 @@ export default function AnswerBook() {
             >
               {/* 书底座（左侧已翻页区域） */}
               <div
-                className="book-base absolute inset-0 rounded-lg overflow-hidden"
+                className="book-base absolute inset-0 rounded-r-lg overflow-hidden"
                 style={{
-                  background: 'linear-gradient(180deg, #d4a574 0%, #c49a6c 10%, #f5e6c8 10.5%, #f5e6c8 100%)',
-                  boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
+                  background: 'linear-gradient(180deg, #e8dcc8 0%, #f0e6d3 50%, #f5e6c8 100%)',
+                  boxShadow: 'inset -2px 0 5px rgba(0,0,0,0.05), 0 10px 40px rgba(0,0,0,0.15)'
                 }}
               >
+                {/* 书脊 */}
                 <div
-                  className="absolute top-0 left-0 w-4 h-full"
+                  className="absolute top-0 left-0 w-3 h-full"
                   style={{
-                    background: 'linear-gradient(90deg, #8b7355 0%, #a08060 50%, #c4a882 100%)'
+                    background: 'linear-gradient(90deg, #c4a882 0%, #d4b896 30%, #e0c9a8 60%, #c4a882 100%)'
+                  }}
+                />
+                {/* 纸张纹理 */}
+                <div 
+                  className="absolute inset-0 opacity-30"
+                  style={{
+                    backgroundImage: `repeating-linear-gradient(
+                      0deg,
+                      transparent,
+                      transparent 2px,
+                      rgba(139, 115, 85, 0.03) 2px,
+                      rgba(139, 115, 85, 0.03) 4px
+                    )`
                   }}
                 />
               </div>
@@ -153,17 +167,24 @@ export default function AnswerBook() {
               <div
                 className={`leaf cover-leaf ${flippingPage === 0 ? 'flipping' : ''}`}
                 style={{
-                  transform: currentPage >= 0 ? 'rotateY(-180deg)' : 'rotateY(0deg)',
+                  transform: currentPage >= 0 ? 'rotateY(-160deg)' : 'rotateY(0deg)',
                   zIndex: PAGE_COUNT + 1
                 }}
               >
                 {/* 封面正面（深蓝色封面） */}
                 <div
-                  className="page front"
+                  className="page front cover-front"
                   style={{
-                    background: 'linear-gradient(180deg, #1a365d 0%, #0f2744 100%)'
+                    background: 'linear-gradient(135deg, #1e3a5f 0%, #0f2744 50%, #1a365d 100%)'
                   }}
                 >
+                  {/* 封面纹理 */}
+                  <div 
+                    className="absolute inset-0 opacity-20"
+                    style={{
+                      backgroundImage: `radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)`
+                    }}
+                  />
                   <CoverPage />
                 </div>
                 {/* 封面背面（空白内页） */}
@@ -171,9 +192,22 @@ export default function AnswerBook() {
                   className="page back"
                   style={{
                     transform: 'rotateY(180deg)',
-                    background: 'linear-gradient(180deg, #fef9e7 0%, #f5e6c8 100%)'
+                    background: 'linear-gradient(180deg, #fefcf8 0%, #f9f5eb 100%)'
                   }}
                 >
+                  {/* 纸张纹理 */}
+                  <div 
+                    className="absolute inset-0 opacity-40"
+                    style={{
+                      backgroundImage: `repeating-linear-gradient(
+                        0deg,
+                        transparent,
+                        transparent 2px,
+                        rgba(139, 115, 85, 0.02) 2px,
+                        rgba(139, 115, 85, 0.02) 4px
+                      )`
+                    }}
+                  />
                   <BlankInnerPage />
                 </div>
               </div>
@@ -182,14 +216,13 @@ export default function AnswerBook() {
               {pages.map((page, index) => {
                 const isFlipped = index < currentPage
                 const isFlipping = index === flippingPage
-                const isCurrent = index === currentPage
 
                 return (
                   <div
                     key={index}
-                    className={`leaf ${isFlipping ? 'flipping' : ''}`}
+                    className={`leaf page-leaf ${isFlipping ? 'flipping' : ''}`}
                     style={{
-                      transform: isFlipped ? 'rotateY(-180deg)' : 'rotateY(0deg)',
+                      transform: isFlipped ? 'rotateY(-160deg)' : 'rotateY(0deg)',
                       zIndex: PAGE_COUNT - index
                     }}
                   >
@@ -197,9 +230,29 @@ export default function AnswerBook() {
                     <div
                       className="page front"
                       style={{
-                        background: 'linear-gradient(180deg, #fef9e7 0%, #f5e6c8 100%)'
+                        background: 'linear-gradient(180deg, #fefcf8 0%, #f9f5eb 100%)'
                       }}
                     >
+                      {/* 纸张纹理 */}
+                      <div 
+                        className="absolute inset-0 opacity-40"
+                        style={{
+                          backgroundImage: `repeating-linear-gradient(
+                            0deg,
+                            transparent,
+                            transparent 2px,
+                            rgba(139, 115, 85, 0.02) 2px,
+                            rgba(139, 115, 85, 0.02) 4px
+                          )`
+                        }}
+                      />
+                      {/* 页面边缘阴影 */}
+                      <div 
+                        className="absolute inset-y-0 right-0 w-8"
+                        style={{
+                          background: 'linear-gradient(90deg, transparent 0%, rgba(139, 115, 85, 0.05) 100%)'
+                        }}
+                      />
                       {page ? (
                         <AnswerPage answer={page} />
                       ) : (
@@ -213,9 +266,22 @@ export default function AnswerBook() {
                       className="page back"
                       style={{
                         transform: 'rotateY(180deg)',
-                        background: 'linear-gradient(180deg, #fef9e7 0%, #f5e6c8 100%)'
+                        background: 'linear-gradient(180deg, #fefcf8 0%, #f9f5eb 100%)'
                       }}
                     >
+                      {/* 纸张纹理 */}
+                      <div 
+                        className="absolute inset-0 opacity-40"
+                        style={{
+                          backgroundImage: `repeating-linear-gradient(
+                            0deg,
+                            transparent,
+                            transparent 2px,
+                            rgba(139, 115, 85, 0.02) 2px,
+                            rgba(139, 115, 85, 0.02) 4px
+                          )`
+                        }}
+                      />
                       <BlankInnerPage />
                     </div>
                   </div>
@@ -223,8 +289,9 @@ export default function AnswerBook() {
               })}
             </div>
 
+            {/* 书本阴影 */}
             <div
-              className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-2/3 h-6 bg-gradient-to-t from-gray-400/30 to-transparent rounded-full blur-md"
+              className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-[280px] h-8 bg-gradient-to-t from-gray-400/20 to-transparent rounded-full blur-xl"
             />
           </div>
 
@@ -284,11 +351,11 @@ export default function AnswerBook() {
         .flipbook {
           position: relative;
           transform-style: preserve-3d;
-          perspective: 1200px;
+          perspective: 1500px;
         }
 
         .book-base {
-          transform: translateZ(-1px);
+          transform: translateZ(-2px);
         }
 
         .leaf {
@@ -297,11 +364,11 @@ export default function AnswerBook() {
           height: 100%;
           transform-style: preserve-3d;
           transform-origin: left center;
-          transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
+          transition: transform 1s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
 
         .leaf.flipping {
-          transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
+          transition: transform 1s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
 
         .page {
@@ -309,16 +376,36 @@ export default function AnswerBook() {
           width: 100%;
           height: 100%;
           backface-visibility: hidden;
-          border-radius: 0 8px 8px 0;
+          border-radius: 0 6px 6px 0;
           overflow: hidden;
         }
 
         .page.front {
-          box-shadow: 2px 0 15px rgba(0,0,0,0.15);
+          box-shadow: 
+            1px 0 3px rgba(0,0,0,0.08),
+            3px 0 8px rgba(0,0,0,0.05);
         }
 
         .page.back {
-          box-shadow: -2px 0 15px rgba(0,0,0,0.15);
+          box-shadow: 
+            -1px 0 3px rgba(0,0,0,0.08),
+            -3px 0 8px rgba(0,0,0,0.05);
+        }
+
+        .cover-front {
+          box-shadow: 
+            2px 0 5px rgba(0,0,0,0.15),
+            5px 0 15px rgba(0,0,0,0.1);
+          border-radius: 0 8px 8px 0;
+        }
+
+        /* 翻页时的弯曲效果 */
+        .page-leaf.flipping .page.front {
+          background: linear-gradient(90deg, #f0ebe0 0%, #fefcf8 5%, #f9f5eb 100%) !important;
+        }
+
+        .cover-leaf.flipping .cover-front {
+          background: linear-gradient(90deg, #0f2744 0%, #1e3a5f 5%, #1a365d 100%) !important;
         }
       `}</style>
     </PageWrapper>
