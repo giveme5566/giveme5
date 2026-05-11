@@ -190,18 +190,10 @@ export async function fetchHoroscope(zodiacId: string): Promise<HoroscopeData | 
 
     return {
       today: {
-        summary: todayHasText 
-          ? (extractTextFromList(todayList, '概述') || generateFortuneDesc(todayScores.all, '整体运势'))
-          : generateFortuneDesc(todayScores.all, '整体运势'),
-        love: todayHasText
-          ? (extractTextFromList(todayList, '爱情') || generateFortuneDesc(todayScores.love, '爱情运势'))
-          : generateFortuneDesc(todayScores.love, '爱情运势'),
-        wealth: todayHasText
-          ? (extractTextFromList(todayList, '财富') || generateFortuneDesc(todayScores.wealth, '财富运势'))
-          : generateFortuneDesc(todayScores.wealth, '财富运势'),
-        work: todayHasText
-          ? (extractTextFromList(todayList, '事业') || generateFortuneDesc(todayScores.work, '事业运势'))
-          : generateFortuneDesc(todayScores.work, '事业运势'),
+        summary: extractTextFromList(todayList, '概述'),
+        love: extractTextFromList(todayList, '爱情'),
+        wealth: extractTextFromList(todayList, '财富'),
+        work: extractTextFromList(todayList, '事业'),
         notice: todayScores.all >= 80 ? '今日运势不错，把握机会' : todayScores.all >= 60 ? '保持平常心，稳中求进' : '今日需谨慎，避免冲动',
         luckyNumber: parseInfoItem(todayInfo, '幸运数字'),
         luckyTime: parseInfoItem(todayInfo, '幸运时间'),
@@ -211,21 +203,11 @@ export async function fetchHoroscope(zodiacId: string): Promise<HoroscopeData | 
         hasText: todayHasText
       },
       week: {
-        summary: weekHasText
-          ? (extractTextFromList(weekList, '概述') || generateFortuneDesc(weekScores.all, '本周整体'))
-          : generateFortuneDesc(weekScores.all, '本周整体'),
-        love: weekHasText
-          ? (extractTextFromList(weekList, '爱情') || generateFortuneDesc(weekScores.love, '爱情运势'))
-          : generateFortuneDesc(weekScores.love, '爱情运势'),
-        wealth: weekHasText
-          ? (extractTextFromList(weekList, '财富') || generateFortuneDesc(weekScores.wealth, '财富运势'))
-          : generateFortuneDesc(weekScores.wealth, '财富运势'),
-        work: weekHasText
-          ? (extractTextFromList(weekList, '事业') || generateFortuneDesc(weekScores.work, '事业运势'))
-          : generateFortuneDesc(weekScores.work, '事业运势'),
-        health: weekHasText
-          ? (extractTextFromList(weekList, '健康') || generateFortuneDesc(weekScores.health || 60, '健康运势'))
-          : generateFortuneDesc(weekScores.health || 60, '健康运势'),
+        summary: extractTextFromList(weekList, '概述'),
+        love: extractTextFromList(weekList, '爱情'),
+        wealth: extractTextFromList(weekList, '财富'),
+        work: extractTextFromList(weekList, '事业'),
+        health: extractTextFromList(weekList, '健康'),
         notice: weekScores.all >= 80 ? '本周运势较好，积极行动' : weekScores.all >= 60 ? '本周平稳，按部就班' : '本周需谨慎，稳扎稳打',
         luckyNumber: parseInfoItem(weekInfo, '幸运数字'),
         luckyDay: parseInfoItem(weekInfo, '幸运时间'),
@@ -236,18 +218,10 @@ export async function fetchHoroscope(zodiacId: string): Promise<HoroscopeData | 
         hasText: weekHasText
       },
       month: {
-        summary: monthHasText
-          ? (extractTextFromList(monthList, '概述') || generateFortuneDesc(monthScores.all, '本月整体'))
-          : generateFortuneDesc(monthScores.all, '本月整体'),
-        love: monthHasText
-          ? (extractTextFromList(monthList, '爱情') || generateFortuneDesc(monthScores.love, '爱情运势'))
-          : generateFortuneDesc(monthScores.love, '爱情运势'),
-        wealth: monthHasText
-          ? (extractTextFromList(monthList, '财富') || generateFortuneDesc(monthScores.wealth, '财富运势'))
-          : generateFortuneDesc(monthScores.wealth, '财富运势'),
-        work: monthHasText
-          ? (extractTextFromList(monthList, '事业') || generateFortuneDesc(monthScores.work, '事业运势'))
-          : generateFortuneDesc(monthScores.work, '事业运势'),
+        summary: extractTextFromList(monthList, '概述'),
+        love: extractTextFromList(monthList, '爱情'),
+        wealth: extractTextFromList(monthList, '财富'),
+        work: extractTextFromList(monthList, '事业'),
         advantage: monthScores.all >= 80 ? '运势强劲，把握机遇' : monthScores.all >= 60 ? '稳中有进，持续努力' : '需要耐心，厚积薄发',
         weakness: monthScores.all >= 80 ? '避免骄傲，保持谦逊' : monthScores.all >= 60 ? '注意细节，防范风险' : '谨慎行事，避免冲动',
         luckyStar: parseInfoItem(monthInfo, '贵人星座'),

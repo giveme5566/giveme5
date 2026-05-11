@@ -279,25 +279,22 @@ function LuckyInfo({ items }: { items: { label: string; value: string }[] }) {
 function TodayFortune({ data }: { data: HoroscopeData['today'] }) {
   return (
     <div className="space-y-3">
-      {/* 雷达图看板 */}
+      {/* 雷达图看板 - 始终显示 */}
       <div className="bg-white/70 rounded-xl p-4 border border-white/50">
         <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-2 text-center">运势评分</div>
         <RadarChart scores={data.scores} label="今日运势" />
       </div>
 
-      {/* 有文本时展示文本描述 */}
-      {data.hasText && (
-        <>
-          <div className="bg-white/70 rounded-xl p-4 border border-white/50">
-            <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">今日概述</div>
-            <p className="text-sm text-gray-700 leading-relaxed">{data.summary}</p>
-          </div>
-
-          {data.love && <FortuneSection title="爱情运势" content={data.love} color="pink" />}
-          {data.work && <FortuneSection title="事业运势" content={data.work} color="blue" />}
-          {data.wealth && <FortuneSection title="财富运势" content={data.wealth} color="amber" />}
-        </>
+      {/* 有真实文本时展示文本描述 */}
+      {data.hasText && data.summary && (
+        <div className="bg-white/70 rounded-xl p-4 border border-white/50">
+          <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">今日概述</div>
+          <p className="text-sm text-gray-700 leading-relaxed">{data.summary}</p>
+        </div>
       )}
+      {data.hasText && data.love && <FortuneSection title="爱情运势" content={data.love} color="pink" />}
+      {data.hasText && data.work && <FortuneSection title="事业运势" content={data.work} color="blue" />}
+      {data.hasText && data.wealth && <FortuneSection title="财富运势" content={data.wealth} color="amber" />}
 
       <LuckyInfo items={[
         { label: '幸运数字', value: data.luckyNumber },
@@ -319,26 +316,23 @@ function TodayFortune({ data }: { data: HoroscopeData['today'] }) {
 function WeekFortune({ data }: { data: HoroscopeData['week'] }) {
   return (
     <div className="space-y-3">
-      {/* 雷达图看板 */}
+      {/* 雷达图看板 - 始终显示 */}
       <div className="bg-white/70 rounded-xl p-4 border border-white/50">
         <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-2 text-center">运势评分</div>
         <RadarChart scores={data.scores} label="本周运势" />
       </div>
 
-      {/* 有文本时展示文本描述 */}
-      {data.hasText && (
-        <>
-          <div className="bg-white/70 rounded-xl p-4 border border-white/50">
-            <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">本周概述</div>
-            <p className="text-sm text-gray-700 leading-relaxed">{data.summary}</p>
-          </div>
-
-          {data.love && <FortuneSection title="爱情运势" content={data.love} color="pink" />}
-          {data.work && <FortuneSection title="事业运势" content={data.work} color="blue" />}
-          {data.wealth && <FortuneSection title="财富运势" content={data.wealth} color="amber" />}
-          {data.health && <FortuneSection title="健康运势" content={data.health} color="green" />}
-        </>
+      {/* 有真实文本时展示文本描述 */}
+      {data.hasText && data.summary && (
+        <div className="bg-white/70 rounded-xl p-4 border border-white/50">
+          <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">本周概述</div>
+          <p className="text-sm text-gray-700 leading-relaxed">{data.summary}</p>
+        </div>
       )}
+      {data.hasText && data.love && <FortuneSection title="爱情运势" content={data.love} color="pink" />}
+      {data.hasText && data.work && <FortuneSection title="事业运势" content={data.work} color="blue" />}
+      {data.hasText && data.wealth && <FortuneSection title="财富运势" content={data.wealth} color="amber" />}
+      {data.hasText && data.health && <FortuneSection title="健康运势" content={data.health} color="green" />}
 
       <LuckyInfo items={[
         { label: '幸运数字', value: data.luckyNumber },
@@ -367,25 +361,22 @@ function WeekFortune({ data }: { data: HoroscopeData['week'] }) {
 function MonthFortune({ data }: { data: HoroscopeData['month'] }) {
   return (
     <div className="space-y-3">
-      {/* 雷达图看板 */}
+      {/* 雷达图看板 - 始终显示 */}
       <div className="bg-white/70 rounded-xl p-4 border border-white/50">
         <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-2 text-center">运势评分</div>
         <RadarChart scores={data.scores} label="本月运势" />
       </div>
 
-      {/* 有文本时展示文本描述 */}
-      {data.hasText && (
-        <>
-          <div className="bg-white/70 rounded-xl p-4 border border-white/50">
-            <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">本月概述</div>
-            <p className="text-sm text-gray-700 leading-relaxed">{data.summary}</p>
-          </div>
-
-          {data.love && <FortuneSection title="爱情运势" content={data.love} color="pink" />}
-          {data.work && <FortuneSection title="事业运势" content={data.work} color="blue" />}
-          {data.wealth && <FortuneSection title="财富运势" content={data.wealth} color="amber" />}
-        </>
+      {/* 有真实文本时展示文本描述 */}
+      {data.hasText && data.summary && (
+        <div className="bg-white/70 rounded-xl p-4 border border-white/50">
+          <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">本月概述</div>
+          <p className="text-sm text-gray-700 leading-relaxed">{data.summary}</p>
+        </div>
       )}
+      {data.hasText && data.love && <FortuneSection title="爱情运势" content={data.love} color="pink" />}
+      {data.hasText && data.work && <FortuneSection title="事业运势" content={data.work} color="blue" />}
+      {data.hasText && data.wealth && <FortuneSection title="财富运势" content={data.wealth} color="amber" />}
 
       {(data.advantage || data.weakness) && (
         <div className="grid grid-cols-2 gap-3">
