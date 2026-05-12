@@ -10,10 +10,6 @@ export interface FortuneScores {
 
 export interface HoroscopeData {
   summary: string
-  love: string
-  wealth: string
-  work: string
-  health: string
   luckyNumber: string
   luckyColor: string
   luckyStar: string
@@ -23,7 +19,6 @@ export interface HoroscopeData {
 const API_KEY = '43bf776bd9aa457b8183f3e38b9af778'
 const API_BASE = 'https://apis.tianapi.com/star/index'
 
-// 星座名称映射（从天行API用的中文名）
 const zodiacNameMap: Record<string, string> = {
   'aries': '白羊座',
   'taurus': '金牛座',
@@ -39,13 +34,11 @@ const zodiacNameMap: Record<string, string> = {
   'pisces': '双鱼座'
 }
 
-// 解析指数（如"85%" -> 85）
 function parseIndex(content: string): number {
   const match = content.match(/(\d+)/)
   return match ? parseInt(match[1]) : 60
 }
 
-// 从list中提取内容
 function extractFromList(list: Array<{ type: string; content: string }>, typeName: string): string {
   const item = list.find((i: { type: string; content: string }) => i.type === typeName)
   return item?.content || ''
@@ -58,7 +51,6 @@ export async function fetchHoroscope(zodiacId: string): Promise<HoroscopeData | 
     throw new Error(`Unknown zodiac: ${zodiacId}`)
   }
 
-  // 添加超时控制
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), 10000)
 
@@ -66,7 +58,7 @@ export async function fetchHoroscope(zodiacId: string): Promise<HoroscopeData | 
     const response = await fetch(`${API_BASE}?key=${API_KEY}&astro=${encodeURIComponent(starName)}`, {
       signal: controller.signal
     })
-    
+
     clearTimeout(timeoutId)
 
     if (!response.ok) {
@@ -85,7 +77,6 @@ export async function fetchHoroscope(zodiacId: string): Promise<HoroscopeData | 
 
     const list = data.result.list
 
-    // 解析各项数据
     const scores = {
       all: parseIndex(extractFromList(list, '综合指数')),
       love: parseIndex(extractFromList(list, '爱情指数')),
@@ -94,15 +85,8 @@ export async function fetchHoroscope(zodiacId: string): Promise<HoroscopeData | 
       health: parseIndex(extractFromList(list, '健康指数'))
     }
 
-    // 解析今日概述文本
-    const summaryText = extractFromList(list, '今日概述')
-
     return {
-      summary: summaryText,
-      love: scores.love >= 80 ? '爱情运势不错，把握机会' : scores.love >= 60 ? '爱情平稳，顺其自然' : '爱情运势一般，保持耐心',
-      wealth: scores.wealth >= 80 ? '财运不错，适合理财' : scores.wealth >= 60 ? '财运平稳，量入为出' : '财运一般，谨慎投资',
-      work: scores.work >= 80 ? '工作顺利，积极进取' : scores.work >= 60 ? '工作平稳，按部就班' : '工作有挑战，保持专注',
-      health: scores.health >= 80 ? '健康状况良好' : scores.health >= 60 ? '健康状况平稳' : '注意休息，保持健康',
+      summary: extractFromList(list, '今日概述'),
       luckyNumber: extractFromList(list, '幸运数字'),
       luckyColor: extractFromList(list, '幸运颜色'),
       luckyStar: extractFromList(list, '贵人星座'),

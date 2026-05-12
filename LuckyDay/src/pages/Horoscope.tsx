@@ -37,7 +37,6 @@ function ZodiacCard({ sign, onClick }: { sign: ZodiacSign; onClick: () => void }
   )
 }
 
-// 雷达图组件
 function RadarChart({ scores, label }: { scores: FortuneScores; label: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const chartRef = useRef<Chart | null>(null)
@@ -45,7 +44,6 @@ function RadarChart({ scores, label }: { scores: FortuneScores; label: string })
   useEffect(() => {
     if (!canvasRef.current) return
 
-    // 销毁旧图表
     if (chartRef.current) {
       chartRef.current.destroy()
     }
@@ -178,15 +176,40 @@ function ZodiacDetail({ sign, onBack }: { sign: ZodiacSign; onBack: () => void }
           </div>
 
           <div className="space-y-4">
-            <TodayFortune data={horoscopeData} />
-          </div>
-        </div>
+            <div className="bg-white/70 rounded-xl p-4 border border-white/50">
+              <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-2 text-center">今日运势评分</div>
+              <RadarChart scores={horoscopeData.scores} label="今日运势" />
+            </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <InfoCard label="幸运数字" value={sign.luckyNumbers.join(' · ')} />
-          <InfoCard label="幸运颜色" value={sign.luckyColors.join(' · ')} />
-          <div className="col-span-2">
-            <InfoCard label="速配星座" value={sign.compatible.join(' · ')} />
+            {horoscopeData.summary && (
+              <div className="bg-white/70 rounded-xl p-4 border border-white/50">
+                <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">今日概述</div>
+                <p className="text-sm text-gray-700 leading-relaxed">{horoscopeData.summary}</p>
+              </div>
+            )}
+
+            <div className="pt-4 border-t border-gray-200/40">
+              <div className="grid grid-cols-3 gap-2">
+                {horoscopeData.luckyNumber && (
+                  <div className="text-center">
+                    <div className="text-[10px] text-gray-400 uppercase tracking-wider">幸运数字</div>
+                    <div className="text-lg font-medium text-gray-700 mt-1">{horoscopeData.luckyNumber}</div>
+                  </div>
+                )}
+                {horoscopeData.luckyColor && (
+                  <div className="text-center">
+                    <div className="text-[10px] text-gray-400 uppercase tracking-wider">幸运颜色</div>
+                    <div className="text-sm font-medium text-gray-700 mt-1">{horoscopeData.luckyColor}</div>
+                  </div>
+                )}
+                {horoscopeData.luckyStar && (
+                  <div className="text-center">
+                    <div className="text-[10px] text-gray-400 uppercase tracking-wider">贵人星座</div>
+                    <div className="text-sm font-medium text-gray-700 mt-1">{horoscopeData.luckyStar}</div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -205,82 +228,6 @@ function BackButton({ onBack }: { onBack: () => void }) {
       </svg>
       <span>返回星座列表</span>
     </button>
-  )
-}
-
-function InfoCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="bg-white rounded-2xl p-4 border border-gray-100/80">
-      <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-1.5">{label}</div>
-      <div className="text-sm text-gray-700 font-medium tracking-wide">{value}</div>
-    </div>
-  )
-}
-
-function FortuneSection({ title, content, color }: { title: string; content: string; color: string }) {
-  const colorClasses: Record<string, string> = {
-    pink: 'border-l-pink-300/60',
-    blue: 'border-l-blue-300/60',
-    amber: 'border-l-amber-300/60',
-    green: 'border-l-green-300/60',
-    purple: 'border-l-purple-300/60'
-  }
-
-  return (
-    <div className={`bg-white/60 rounded-xl p-4 border-l-2 ${colorClasses[color] || colorClasses.blue}`}>
-      <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">{title}</div>
-      <p className="text-sm text-gray-700 leading-relaxed">{content}</p>
-    </div>
-  )
-}
-
-function LuckyInfo({ items }: { items: { label: string; value: string }[] }) {
-  return (
-    <div className="pt-4 border-t border-gray-200/40">
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-        {items.map((item, idx) => (
-          item.value && (
-            <div key={idx} className="text-xs">
-              <span className="text-gray-400 tracking-wide">{item.label}</span>
-              <span className="text-gray-600 ml-1.5">{item.value}</span>
-            </div>
-          )
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function TodayFortune({ data }: { data: HoroscopeData }) {
-  return (
-    <div className="space-y-3">
-      {/* 雷达图看板 */}
-      <div className="bg-white/70 rounded-xl p-4 border border-white/50">
-        <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-2 text-center">今日运势评分</div>
-        <RadarChart scores={data.scores} label="今日运势" />
-      </div>
-
-      {/* 今日概述 - 天行API有真实文本 */}
-      {data.summary && (
-        <div className="bg-white/70 rounded-xl p-4 border border-white/50">
-          <div className="text-[11px] text-gray-400 uppercase tracking-wider mb-2">今日概述</div>
-          <p className="text-sm text-gray-700 leading-relaxed">{data.summary}</p>
-        </div>
-      )}
-
-      {/* 各项运势 */}
-      {data.love && <FortuneSection title="爱情运势" content={data.love} color="pink" />}
-      {data.work && <FortuneSection title="事业运势" content={data.work} color="blue" />}
-      {data.wealth && <FortuneSection title="财富运势" content={data.wealth} color="amber" />}
-      {data.health && <FortuneSection title="健康运势" content={data.health} color="green" />}
-
-      {/* 幸运信息 */}
-      <LuckyInfo items={[
-        { label: '幸运数字', value: data.luckyNumber },
-        { label: '幸运颜色', value: data.luckyColor },
-        { label: '贵人星座', value: data.luckyStar }
-      ]} />
-    </div>
   )
 }
 
