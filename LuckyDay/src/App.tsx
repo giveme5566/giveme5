@@ -6,6 +6,7 @@ import HolyCup from './pages/HolyCup'
 import FortuneStick from './pages/FortuneStick'
 import AnswerBook from './pages/AnswerBook'
 import Tarot from './pages/Tarot'
+import YesNo from './pages/YesNo'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
       <Route path="/fortune-stick" element={<FortuneStick />} />
       <Route path="/answer-book" element={<AnswerBook />} />
       <Route path="/tarot" element={<Tarot />} />
+      <Route path="/yes-no" element={<YesNo />} />
     </Routes>
   )
 }
