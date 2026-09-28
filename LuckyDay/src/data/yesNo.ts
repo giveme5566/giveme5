@@ -1,7 +1,6 @@
-// Yes or No 模块语料
-// 每个结果包含：核心答案 + 倾向度 + 解释文本
+// Yes or No 模块语料 - 简化版，只有 YES 和 NO
 
-export type YesNoResult = 'yes' | 'no' | 'maybe'
+export type YesNoResult = 'yes' | 'no'
 
 export interface YesNoCard {
   type: YesNoResult
@@ -36,44 +35,15 @@ export const noCards: YesNoCard[] = [
   { type: 'no', text: '不，现在放下会比坚持更轻松' },
 ]
 
-// MAYBE 的解释语料（中间态，增加趣味）
-export const maybeCards: YesNoCard[] = [
-  { type: 'maybe', text: '模棱两可，答案取决于你的选择' },
-  { type: 'maybe', text: '不确定，多问问身边信任的人' },
-  { type: 'maybe', text: '这不是简单的是或非，需要你自己权衡' },
-  { type: 'maybe', text: '答案在你心里，静下心来听听' },
-  { type: 'maybe', text: '说不准，再给自己一点时间考虑' },
-  { type: 'maybe', text: '看情况，关键在于你有多想要' },
-  { type: 'maybe', text: '这个问题没有标准答案，跟随直觉' },
-  { type: 'maybe', text: '硬币在空中翻转，决定权在你' },
-]
-
 interface FullResult {
   result: YesNoResult
   card: YesNoCard
-  confidence: number // 0-100 倾向度
 }
 
-// 生成结果：60% yes / 30% no / 10% maybe（可调整概率）
+// 生成结果：50% yes / 50% no
 export function getYesNoResult(): FullResult {
-  const rand = Math.random()
-  let result: YesNoResult
-  let pool: YesNoCard[]
-
-  if (rand < 0.6) {
-    result = 'yes'
-    pool = yesCards
-  } else if (rand < 0.9) {
-    result = 'no'
-    pool = noCards
-  } else {
-    result = 'maybe'
-    pool = maybeCards
-  }
-
+  const result: YesNoResult = Math.random() < 0.5 ? 'yes' : 'no'
+  const pool = result === 'yes' ? yesCards : noCards
   const card = pool[Math.floor(Math.random() * pool.length)]
-  // 倾向度 60-99
-  const confidence = Math.floor(Math.random() * 40) + 60
-
-  return { result, card, confidence }
+  return { result, card }
 }
